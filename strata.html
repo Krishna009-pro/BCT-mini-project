@@ -2378,19 +2378,19 @@ contract CollegeFeePayment {
         <div class="cert-grid">
           <div>
             <div class="cert-item-label">Student Name</div>
-            <div class="cert-item-val" id="rcptName">Aarav Mehta</div>
+            <div class="cert-item-val" id="rcptName">—</div>
           </div>
           <div>
             <div class="cert-item-label">Student Roll ID</div>
-            <div class="cert-item-val mono" style="color: var(--ai-teal);" id="rcptId">2024-BCT-110</div>
+            <div class="cert-item-val mono" style="color: var(--ai-teal);" id="rcptId">—</div>
           </div>
           <div>
             <div class="cert-item-label">Department</div>
-            <div class="cert-item-val" id="rcptDept">Blockchain Technology</div>
+            <div class="cert-item-val" id="rcptDept">—</div>
           </div>
           <div>
             <div class="cert-item-label">Amount Cleared</div>
-            <div class="cert-item-val mono" style="color: var(--success-teal); font-size: 17px; font-weight: 700;" id="rcptAmount">0.050 ETH</div>
+            <div class="cert-item-val mono" style="color: var(--success-teal); font-size: 17px; font-weight: 700;" id="rcptAmount">—</div>
           </div>
         </div>
 
@@ -2401,10 +2401,10 @@ contract CollegeFeePayment {
               View on Etherscan ↗
             </a>
           </div>
-          <code class="mono" style="color: #c4b5fd; word-break: break-all; font-size: 12px; display: block; margin: 4px 0 8px;" id="rcptHash">0x4e29f3d91b8a5367b1897c8d76e33f381014a51ebbb59b24479e0a02cfc08129</code>
+          <code class="mono" style="color: #c4b5fd; word-break: break-all; font-size: 12px; display: block; margin: 4px 0 8px;" id="rcptHash">—</code>
           <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: var(--nav-grey);">
-            <span>Block #5220492 &bull; Consensus Finalized</span>
-            <span id="rcptDate">Oct 25, 2026</span>
+            <span id="rcptBlock">Consensus Finalized</span>
+            <span id="rcptDate">—</span>
           </div>
         </div>
 
@@ -2927,6 +2927,8 @@ contract CollegeFeePayment {
       document.getElementById('rcptAmount').innerText = rec.amountEth + " ETH";
       document.getElementById('rcptHash').innerText = rec.txHash;
       document.getElementById('rcptDate').innerText = rec.timestamp;
+      const blockEl = document.getElementById('rcptBlock');
+      if (blockEl) blockEl.innerText = rec.blockNumber ? `Block #${rec.blockNumber} • Consensus Finalized` : 'Consensus Finalized';
 
       const link = document.getElementById('rcptEtherscanLink');
       if (link) {
