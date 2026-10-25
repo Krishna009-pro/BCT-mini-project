@@ -1,0 +1,435 @@
+// Real Production-Ready Web3 Configuration for CollegeFeePayment
+// Generated automatically from contracts/CollegeFeePayment.sol
+
+export const DEFAULT_CONTRACT_ADDRESS = "0x8B32E185EfA84d720bf7D7100d582bffD1b5C269";
+export const DEFAULT_COLLEGE_ACCOUNT = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
+export const DEFAULT_FEE_ETH = "0.05";
+export const DEFAULT_FEE_WEI = "50000000000000000"; // 0.05 ETH in Wei
+
+export const SEPOLIA_CHAIN_ID = 11155111;
+export const SEPOLIA_HEX_CHAIN_ID = "0xaa36a7";
+export const SEPOLIA_RPC_URLS = [
+  "https://ethereum-sepolia-rpc.publicnode.com",
+  "https://rpc.sepolia.org",
+  "https://sepolia.drpc.org"
+];
+export const SEPOLIA_EXPLORER = "https://sepolia.etherscan.io";
+
+export const CONTRACT_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "_collegeAccount",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_initialFeeAmount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldAccount",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAccount",
+        "type": "address"
+      }
+    ],
+    "name": "CollegeAccountUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "FeeAmountUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "studentAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "studentId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "studentName",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "department",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "semester",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "FeePaid",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_student",
+        "type": "address"
+      }
+    ],
+    "name": "checkPaymentStatus",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "hasPaid",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountPaid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "studentId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "studentName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "department",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "semester",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_studentId",
+        "type": "string"
+      }
+    ],
+    "name": "checkPaymentStatusByRollId",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "hasPaid",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "studentAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountPaid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "studentName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "department",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "semester",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "collegeAccount",
+    "outputs": [
+      {
+        "internalType": "address payable",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "feeAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllStudents",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTotalStudentsPaid",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_studentId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_studentName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_department",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_semester",
+        "type": "string"
+      }
+    ],
+    "name": "payFee",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "records",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "hasPaid",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountPaid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "studentId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "studentName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "department",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "semester",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "rollToAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "studentList",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "_newCollegeAccount",
+        "type": "address"
+      }
+    ],
+    "name": "updateCollegeAccount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newFeeAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateFeeAmount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+export const CONTRACT_BYTECODE = "0x608060405234801561000f575f80fd5b5060405161170e38038061170e83398101604081905261002e916100be565b6001600160a01b0382166100885760405162461bcd60e51b815260206004820152601f60248201527f496e76616c696420636f6c6c656765206163636f756e74206164647265737300604482015260640160405180910390fd5b5f8054336001600160a01b031991821617909155600180549091166001600160a01b0393909316929092179091556002556100f5565b5f80604083850312156100cf575f80fd5b82516001600160a01b03811681146100e5575f80fd5b6020939093015192949293505050565b61160c806101025f395ff3fe6080604052600436106100bf575f3560e01c80639ea55bb01161007c578063e9e3092711610057578063e9e3092714610207578063f50d4f4714610228578063f520fb7d14610268578063f80de5631461029a575f80fd5b80639ea55bb0146101b6578063a4b38aa8146101d5578063bee42c4e146101e8575f80fd5b8063469e9067146100c357806369e15404146100fe5780637df221e9146101215780638da5cb5b1461015857806394317c011461017657806396f5da6614610195575b5f80fd5b3480156100ce575f80fd5b506100e26100dd3660046110ca565b6102ae565b6040516100f59796959493929190611139565b60405180910390f35b348015610109575f80fd5b5061011360025481565b6040519081526020016100f5565b34801561012c575f80fd5b5061014061013b3660046111a7565b610507565b6040516001600160a01b0390911681526020016100f5565b348015610163575f80fd5b505f54610140906001600160a01b031681565b348015610181575f80fd5b50600154610140906001600160a01b031681565b3480156101a0575f80fd5b506101b46101af3660046110ca565b61052f565b005b3480156101c1575f80fd5b506101b46101d03660046111a7565b610612565b6101b46101e336600461125b565b61067c565b3480156101f3575f80fd5b506100e26102023660046110ca565b610a83565b348015610212575f80fd5b5061021b610d66565b6040516100f59190611301565b348015610233575f80fd5b5061014061024236600461134d565b80516020818301810180516004825292820191909301209152546001600160a01b031681565b348015610273575f80fd5b5061028761028236600461134d565b610dc6565b6040516100f59796959493929190611387565b3480156102a5575f80fd5b50600554610113565b600360208190525f9182526040909120805460018201546002830154938301805460ff90931694919391926102e2906113cd565b80601f016020809104026020016040519081016040528092919081815260200182805461030e906113cd565b80156103595780601f1061033057610100808354040283529160200191610359565b820191905f5260205f20905b81548152906001019060200180831161033c57829003601f168201915b50505050509080600401805461036e906113cd565b80601f016020809104026020016040519081016040528092919081815260200182805461039a906113cd565b80156103e55780601f106103bc576101008083540402835291602001916103e5565b820191905f5260205f20905b8154815290600101906020018083116103c857829003601f168201915b5050505050908060050180546103fa906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610426906113cd565b80156104715780601f1061044857610100808354040283529160200191610471565b820191905f5260205f20905b81548152906001019060200180831161045457829003601f168201915b505050505090806006018054610486906113cd565b80601f01602080910402602001604051908101604052809291908181526020018280546104b2906113cd565b80156104fd5780601f106104d4576101008083540402835291602001916104fd565b820191905f5260205f20905b8154815290600101906020018083116104e057829003601f168201915b5050505050905087565b60058181548110610516575f80fd5b5f918252602090912001546001600160a01b0316905081565b5f546001600160a01b031633146105615760405162461bcd60e51b815260040161055890611405565b60405180910390fd5b6001600160a01b0381166105a95760405162461bcd60e51b815260206004820152600f60248201526e496e76616c6964206164647265737360881b6044820152606401610558565b600154604080516001600160a01b03928316815291831660208301527fe69408bed62815dfd99c1b9eada0d4f094a04aa3a01c3392a8b3ea1fb2a7977c910160405180910390a1600180546001600160a01b0319166001600160a01b0392909216919091179055565b5f546001600160a01b0316331461063b5760405162461bcd60e51b815260040161055890611405565b60025460408051918252602082018390527fb6600428041f36ab218d984115a85adc1ffb17cb85a81801032cb590a8a8bc99910160405180910390a1600255565b5f8451116106cc5760405162461bcd60e51b815260206004820152601a60248201527f53747564656e742049442063616e6e6f7420626520656d7074790000000000006044820152606401610558565b5f83511161071c5760405162461bcd60e51b815260206004820152601c60248201527f53747564656e74206e616d652063616e6e6f7420626520656d707479000000006044820152606401610558565b600254341461076d5760405162461bcd60e51b815260206004820152601960248201527f496e636f72726563742066656520616d6f756e742073656e74000000000000006044820152606401610558565b335f9081526003602052604090205460ff16156107cc5760405162461bcd60e51b815260206004820181905260248201527f46656520616c7265616479207061696420666f7220746869732077616c6c65746044820152606401610558565b5f6001600160a01b03166004856040516107e6919061144f565b908152604051908190036020019020546001600160a01b0316146108565760405162461bcd60e51b815260206004820152602160248201527f46656520616c7265616479207061696420666f72207468697320526f6c6c20496044820152601160fa1b6064820152608401610558565b6040805160e081018252600180825234602080840191825242848601908152606085018a8152608086018a905260a0860189905260c08601889052335f908152600393849052969096208551815460ff1916901515178155925193830193909355915160028201559251919291908201906108d190826114b8565b50608082015160048201906108e690826114b8565b5060a082015160058201906108fb90826114b8565b5060c0820151600682019061091090826114b8565b5090505033600485604051610925919061144f565b90815260405190819003602001812080546001600160a01b039384166001600160a01b03199182161790915560058054600181810183555f9283527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db09091018054909316331790925590549092169034905f6040518083038185875af1925050503d805f81146109d0576040519150601f19603f3d011682016040523d82523d5f602084013e6109d5565b606091505b5050905080610a315760405162461bcd60e51b815260206004820152602260248201527f5472616e7366657220746f20636f6c6c656765206163636f756e74206661696c604482015261195960f21b6064820152608401610558565b336001600160a01b03167faf274a8c232ee2f2549232e51e7bcb5e0dd2bf2eab75393fe9d3c1956be268f6868686863442604051610a7496959493929190611574565b60405180910390a25050505050565b5f805f6060806060805f60035f8a6001600160a01b03166001600160a01b031681526020019081526020015f206040518060e00160405290815f82015f9054906101000a900460ff161515151581526020016001820154815260200160028201548152602001600382018054610af8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610b24906113cd565b8015610b6f5780601f10610b4657610100808354040283529160200191610b6f565b820191905f5260205f20905b815481529060010190602001808311610b5257829003601f168201915b50505050508152602001600482018054610b88906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610bb4906113cd565b8015610bff5780601f10610bd657610100808354040283529160200191610bff565b820191905f5260205f20905b815481529060010190602001808311610be257829003601f168201915b50505050508152602001600582018054610c18906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610c44906113cd565b8015610c8f5780601f10610c6657610100808354040283529160200191610c8f565b820191905f5260205f20905b815481529060010190602001808311610c7257829003601f168201915b50505050508152602001600682018054610ca8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610cd4906113cd565b8015610d1f5780601f10610cf657610100808354040283529160200191610d1f565b820191905f5260205f20905b815481529060010190602001808311610d0257829003601f168201915b5050505050815250509050805f015181602001518260400151836060015184608001518560a001518660c00151975097509750975097509750975050919395979092949650565b60606005805480602002602001604051908101604052809291908181526020018280548015610dbc57602002820191905f5260205f20905b81546001600160a01b03168152600190910190602001808311610d9e575b5050505050905090565b5f805f8060608060605f600489604051610de0919061144f565b908152604080519182900360209081018320546001600160a01b03165f818152600380845284822060e087018652805460ff161515875260018101549487019490945260028401549486019490945292820180549195509293926060840191610e48906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610e74906113cd565b8015610ebf5780601f10610e9657610100808354040283529160200191610ebf565b820191905f5260205f20905b815481529060010190602001808311610ea257829003601f168201915b50505050508152602001600482018054610ed8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610f04906113cd565b8015610f4f5780601f10610f2657610100808354040283529160200191610f4f565b820191905f5260205f20905b815481529060010190602001808311610f3257829003601f168201915b50505050508152602001600582018054610f68906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610f94906113cd565b8015610fdf5780601f10610fb657610100808354040283529160200191610fdf565b820191905f5260205f20905b815481529060010190602001808311610fc257829003601f168201915b50505050508152602001600682018054610ff8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054611024906113cd565b801561106f5780601f106110465761010080835404028352916020019161106f565b820191905f5260205f20905b81548152906001019060200180831161105257829003601f168201915b5050505050815250509050805f0151828260200151836040015184608001518560a001518660c0015198509850985098509850985098505050919395979092949650565b6001600160a01b03811681146110c7575f80fd5b50565b5f602082840312156110da575f80fd5b81356110e5816110b3565b9392505050565b5f5b838110156111065781810151838201526020016110ee565b50505f910152565b5f81518084526111258160208601602086016110ec565b601f01601f19169290920160200192915050565b871515815286602082015285604082015260e060608201525f61115f60e083018761110e565b8281036080840152611171818761110e565b905082810360a0840152611185818661110e565b905082810360c0840152611199818561110e565b9a9950505050505050505050565b5f602082840312156111b7575f80fd5b5035919050565b634e487b7160e01b5f52604160045260245ffd5b5f82601f8301126111e1575f80fd5b813567ffffffffffffffff808211156111fc576111fc6111be565b604051601f8301601f19908116603f01168101908282118183101715611224576112246111be565b8160405283815286602085880101111561123c575f80fd5b836020870160208301375f602085830101528094505050505092915050565b5f805f806080858703121561126e575f80fd5b843567ffffffffffffffff80821115611285575f80fd5b611291888389016111d2565b955060208701359150808211156112a6575f80fd5b6112b2888389016111d2565b945060408701359150808211156112c7575f80fd5b6112d3888389016111d2565b935060608701359150808211156112e8575f80fd5b506112f5878288016111d2565b91505092959194509250565b602080825282518282018190525f9190848201906040850190845b818110156113415783516001600160a01b03168352928401929184019160010161131c565b50909695505050505050565b5f6020828403121561135d575f80fd5b813567ffffffffffffffff811115611373575f80fd5b61137f848285016111d2565b949350505050565b871515815260018060a01b038716602082015285604082015284606082015260e060808201525f6113bb60e083018661110e565b82810360a0840152611185818661110e565b600181811c908216806113e157607f821691505b6020821081036113ff57634e487b7160e01b5f52602260045260245ffd5b50919050565b6020808252602a908201527f4f6e6c7920636f6c6c6567652061646d696e2063616e20706572666f726d20746040820152693434b99030b1ba34b7b760b11b606082015260800190565b5f82516114608184602087016110ec565b9190910192915050565b601f8211156114b3575f81815260208120601f850160051c810160208610156114905750805b601f850160051c820191505b818110156114af5782815560010161149c565b5050505b505050565b815167ffffffffffffffff8111156114d2576114d26111be565b6114e6816114e084546113cd565b8461146a565b602080601f831160018114611519575f84156115025750858301515b5f19600386901b1c1916600185901b1785556114af565b5f85815260208120601f198616915b8281101561154757888601518255948401946001909101908401611528565b508582101561156457878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b60c081525f61158660c083018961110e565b8281036020840152611598818961110e565b905082810360408401526115ac818861110e565b905082810360608401526115c0818761110e565b6080840195909552505060a0015294935050505056fea2646970667358221220aa62399f66239e692fcfa8a7fd0d48abeb8edec49f807f66102a057c1d09508764736f6c63430008140033";
+
+export const SOLIDITY_CODE_ENHANCED = "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\n/**\n * @title CollegeFeePayment\n * @dev Smart contract for managing student college fee payments on the Ethereum blockchain.\n * Features Checks-Effects-Interactions (CEI) security, multi-attribute student records,\n * dual wallet/roll-ID verification, and administrative treasury management.\n */\ncontract CollegeFeePayment {\n    // Contract owner (Administrator / College Authority)\n    address public owner;\n\n    // College treasury / fee collection account\n    address payable public collegeAccount;\n\n    // Fee amount in Wei (e.g., 0.05 ether = 50000000000000000 Wei)\n    uint256 public feeAmount;\n\n    // Payment details struct\n    struct PaymentRecord {\n        bool hasPaid;\n        uint256 amountPaid;\n        uint256 timestamp;\n        string studentId;\n        string studentName;\n        string department;\n        string semester;\n    }\n\n    // Mapping from student wallet address to their payment record\n    mapping(address => PaymentRecord) public records;\n\n    // Mapping from student roll ID to their wallet address for instant verification\n    mapping(string => address) public rollToAddress;\n\n    // List of student addresses who have paid\n    address[] public studentList;\n\n    // Events\n    event FeePaid(\n        address indexed studentAddress,\n        string studentId,\n        string studentName,\n        string department,\n        string semester,\n        uint256 amount,\n        uint256 timestamp\n    );\n    event FeeAmountUpdated(uint256 oldFee, uint256 newFee);\n    event CollegeAccountUpdated(address oldAccount, address newAccount);\n\n    // Modifiers\n    modifier onlyOwner() {\n        require(msg.sender == owner, \"Only college admin can perform this action\");\n        _;\n    }\n\n    /**\n     * @param _collegeAccount The address where collected fees will be forwarded\n     * @param _initialFeeAmount The fee amount in Wei (e.g., 0.05 ether)\n     */\n    constructor(address payable _collegeAccount, uint256 _initialFeeAmount) {\n        require(_collegeAccount != address(0), \"Invalid college account address\");\n        owner = msg.sender;\n        collegeAccount = _collegeAccount;\n        feeAmount = _initialFeeAmount;\n    }\n\n    /**\n     * @dev Allows a student to pay their college fee.\n     * Follows Checks-Effects-Interactions (CEI) to prevent reentrancy attacks.\n     * @param _studentId Student Roll / ID number\n     * @param _studentName Student Name\n     * @param _department Department/Branch (e.g. Blockchain Technology)\n     * @param _semester Semester (e.g. Semester 5)\n     */\n    function payFee(\n        string memory _studentId,\n        string memory _studentName,\n        string memory _department,\n        string memory _semester\n    ) public payable {\n        require(bytes(_studentId).length > 0, \"Student ID cannot be empty\");\n        require(bytes(_studentName).length > 0, \"Student name cannot be empty\");\n        require(msg.value == feeAmount, \"Incorrect fee amount sent\");\n        require(!records[msg.sender].hasPaid, \"Fee already paid for this wallet\");\n        require(rollToAddress[_studentId] == address(0), \"Fee already paid for this Roll ID\");\n\n        // 1. Effects (Update state before external transfer)\n        records[msg.sender] = PaymentRecord({\n            hasPaid: true,\n            amountPaid: msg.value,\n            timestamp: block.timestamp,\n            studentId: _studentId,\n            studentName: _studentName,\n            department: _department,\n            semester: _semester\n        });\n        rollToAddress[_studentId] = msg.sender;\n        studentList.push(msg.sender);\n\n        // 2. Interactions (Send funds to college account using .call)\n        (bool success, ) = collegeAccount.call{value: msg.value}(\"\");\n        require(success, \"Transfer to college account failed\");\n\n        // 3. Emit event for logging and frontend indexing\n        emit FeePaid(\n            msg.sender,\n            _studentId,\n            _studentName,\n            _department,\n            _semester,\n            msg.value,\n            block.timestamp\n        );\n    }\n\n    /**\n     * @dev Check if a specific student wallet has paid the fee\n     */\n    function checkPaymentStatus(address _student)\n        external\n        view\n        returns (\n            bool hasPaid,\n            uint256 amountPaid,\n            uint256 timestamp,\n            string memory studentId,\n            string memory studentName,\n            string memory department,\n            string memory semester\n        )\n    {\n        PaymentRecord memory r = records[_student];\n        return (\n            r.hasPaid,\n            r.amountPaid,\n            r.timestamp,\n            r.studentId,\n            r.studentName,\n            r.department,\n            r.semester\n        );\n    }\n\n    /**\n     * @dev Check payment status directly by student Roll ID\n     */\n    function checkPaymentStatusByRollId(string memory _studentId)\n        external\n        view\n        returns (\n            bool hasPaid,\n            address studentAddress,\n            uint256 amountPaid,\n            uint256 timestamp,\n            string memory studentName,\n            string memory department,\n            string memory semester\n        )\n    {\n        address addr = rollToAddress[_studentId];\n        PaymentRecord memory r = records[addr];\n        return (\n            r.hasPaid,\n            addr,\n            r.amountPaid,\n            r.timestamp,\n            r.studentName,\n            r.department,\n            r.semester\n        );\n    }\n\n    /**\n     * @dev Get total count of students who have paid\n     */\n    function getTotalStudentsPaid() external view returns (uint256) {\n        return studentList.length;\n    }\n\n    /**\n     * @dev Get all student addresses\n     */\n    function getAllStudents() external view returns (address[] memory) {\n        return studentList;\n    }\n\n    /**\n     * @dev Admin function to update the required fee amount\n     */\n    function updateFeeAmount(uint256 _newFeeAmount) external onlyOwner {\n        emit FeeAmountUpdated(feeAmount, _newFeeAmount);\n        feeAmount = _newFeeAmount;\n    }\n\n    /**\n     * @dev Admin function to update the college receiving account\n     */\n    function updateCollegeAccount(address payable _newCollegeAccount) external onlyOwner {\n        require(_newCollegeAccount != address(0), \"Invalid address\");\n        emit CollegeAccountUpdated(collegeAccount, _newCollegeAccount);\n        collegeAccount = _newCollegeAccount;\n    }\n}\n";
+
+export const SOLIDITY_CODE_ORIGINAL = "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract CollegeFeePayment {\n\n    address public collegeAccount;\n    uint public feeAmount = 50000;\n    mapping(address => bool) public hasPaid;\n\n    event FeePaid(address indexed student, uint amount);\n\n    constructor(address _collegeAccount) {\n        collegeAccount = _collegeAccount;\n    }\n\n    function payFee() public payable {\n        require(msg.value == feeAmount, \"Incorrect fee amount\");\n        require(!hasPaid[msg.sender], \"Fee already paid\");\n        payable(collegeAccount).transfer(msg.value);\n        hasPaid[msg.sender] = true;\n        emit FeePaid(msg.sender, msg.value);\n    }\n}\n";
+
+// Real on-chain payments ledger initialized empty (populated exclusively by verified smart contract transactions)
+export const INITIAL_MOCK_PAYMENTS = [];

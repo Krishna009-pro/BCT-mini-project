@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strata Pay • Decentralized College Fee Infrastructure on Ethereum</title>
+  <meta name="description" content="Strata Pay • Decentralized Smart Contract College Fee Payment Portal on Ethereum. Features Checks-Effects-Interactions (CEI) security, dual roll verification, and instant receipts.">
+  <meta name="theme-color" content="#0d0c11">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
+  <!-- Open Graph & Social Cards -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Strata Pay • Decentralized College Fee Infrastructure">
+  <meta property="og:description" content="Immutable college fees cleared on-chain. Live smart contract payments with dual verification and instant receipts.">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Web3 and Animation Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       CSS Custom Properties & Design Tokens
+       ========================================================================== */
+    :root {
+      /* Palette */
+      --bg: #0d0c11;
+      --bg-card: rgba(18, 17, 26, 0.75);
+      --bg-card-hover: rgba(26, 25, 38, 0.85);
+      --ink: #ffffff;
+      --nav-grey: #b9b8bb;
+      --muted-text: #d3d3d7;
+      --wordmark-grey: #bdbdc1;
+      --ai-teal: #9ff0ec;
+      --kicker-teal: #bdf7ee;
+      --logo-grey: #bcbcbf;
+      --violet-1: #4d19b1;
+      --violet-2: #6f5adc;
+      --violet-gradient: linear-gradient(135deg, #4d19b1 0%, #6f5adc 100%);
+      --glass-fill: rgba(255, 255, 255, 0.02);
+      --glass-border: rgba(255, 255, 255, 0.14);
+
+      --success-teal: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.12);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+
+      /* Desktop 2048x1455 unit for Hero: dynamically scaled to fit comfortably within viewport */
+      --u: clamp(0.52px, min(calc(100vw / 2050), calc((100vh - 80px) / 1180)), 0.86px);
+
+      /* Typography */
+      --font-display: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-tech: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(111, 90, 220, 0.09) 0%, transparent 40%),
+        radial-gradient(circle at 90% 40%, rgba(6, 182, 212, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(77, 25, 177, 0.08) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #252433;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #39374d;
+    }
+
+    /* Background Grid */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-size: calc(64 * var(--u)) calc(64 * var(--u));
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+    }
+
+    /* Glass Surface Utility */
+    .glass-surface {
+      background: var(--glass-fill);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px) brightness(1.15) saturate(0.8);
+      -webkit-backdrop-filter: blur(12px) brightness(1.15) saturate(0.8);
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.12),
+        inset 0 0 12px rgba(255, 255, 255, 0.02),
+        0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Typography Utilities */
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 40%, var(--ai-teal) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    /* ==========================================================================
+       Master Sticky Navigation Header
+       ========================================================================== */
+    .master-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 78px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      background: rgba(13, 12, 17, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .brand-tile {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--violet-gradient);
+      box-shadow: 0 4px 20px rgba(111, 90, 220, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .brand-text {
+      position: relative;
+      font-family: var(--font-sans);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--wordmark-grey);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-text sup {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ai-teal);
+      letter-spacing: 0.08em;
+      margin-left: 4px;
+      background: rgba(159, 240, 236, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(159, 240, 236, 0.3);
+      vertical-align: super;
+    }
+
+    /* Nav Links */
+    .master-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-tab-link {
+      color: var(--nav-grey);
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+      padding: 6px 0;
+    }
+
+    .nav-tab-link:hover, .nav-tab-link.active {
+      color: #ffffff;
+    }
+
+    .nav-tab-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--ai-teal);
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--ai-teal);
+    }
+
+    /* Header Actions */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mode-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ai-teal);
+      background: rgba(159, 240, 236, 0.06);
+      border: 1px solid rgba(159, 240, 236, 0.25);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-pill:hover {
+      background: rgba(159, 240, 236, 0.12);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ai-teal);
+      box-shadow: 0 0 8px var(--ai-teal);
+    }
+
+    .btn-wallet {
+      height: 44px;
+      padding: 0 20px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-wallet:hover {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* ==========================================================================
+       Page Container & Views
+       ========================================================================== */
+    .app-main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      min-height: calc(100vh - 78px);
+    }
+
+    .page-view {
+      display: none;
+      animation: pageFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .page-view.active-page {
+      display: block;
+    }
+
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Container for standard pages */
+    .content-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .page-header {
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    .page-kicker {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ai-teal);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .page-subtitle {
+      font-size: 17px;
+      color: var(--muted-text);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       VIEW 1: HOME HERO SECTION (2048x1455 Canvas Experience)
+       ========================================================================== */
+    .hero-canvas-wrap {
+      position: relative;
+      width: 100%;
+      min-height: calc(100vh - 78px);
+      height: auto;
+      padding: 24px 0 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      overflow-y: visible;
+    }
+
+    .hero-canvas {
+      position: relative;
+      width: calc(2048 * var(--u));
+      height: calc(1455 * var(--u));
+      margin: 0 auto;
+      overflow: visible;
+    }
+
+    /* Left Hero Column */
+    .hero-left {
+      position: absolute;
+      left: calc(150 * var(--u));
+      top: calc(210 * var(--u));
+      width: calc(980 * var(--u));
+      z-index: 10;
+    }
+
+    .headline {
+      font-family: var(--font-display);
+      font-size: calc(104 * var(--u));
+      line-height: calc(118 * var(--u));
+      font-weight: 420;
+      letter-spacing: -0.04em;
+      text-rendering: optimizeLegibility;
+    }
+
+    .headline-line {
+      display: inline-block;
+      white-space: nowrap;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 65%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 24px rgba(255, 255, 255, 0.08));
+    }
+
+    .subline {
+      margin-top: calc(34 * var(--u));
+      font-size: calc(29.5 * var(--u));
+      line-height: calc(44 * var(--u));
+      color: var(--muted-text);
+      font-weight: 400;
+      max-width: calc(880 * var(--u));
+    }
+
+    .hero-buttons {
+      margin-top: calc(48 * var(--u));
+      display: flex;
+      align-items: center;
+      gap: calc(22 * var(--u));
+    }
+
+    .btn-hero {
+      height: calc(85 * var(--u));
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(12 * var(--u));
+      padding: 0 calc(46 * var(--u));
+      font-size: calc(21.5 * var(--u));
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-hero-primary {
+      background: var(--violet-gradient);
+      color: #ffffff;
+      box-shadow: 0 calc(10 * var(--u)) calc(32 * var(--u)) rgba(111, 90, 220, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-hero-primary:hover {
+      box-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(111, 90, 220, 0.65);
+      transform: translateY(calc(-2 * var(--u)));
+      filter: brightness(1.08);
+    }
+
+    .btn-hero-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: #ffffff !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .btn-hero-secondary:hover {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff !important;
+      transform: translateY(calc(-2 * var(--u)));
+    }
+
+    .stats-row {
+      margin-top: calc(72 * var(--u));
+      display: flex;
+      align-items: center;
+      gap: calc(42 * var(--u));
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: baseline;
+      gap: calc(14 * var(--u));
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: calc(50 * var(--u));
+      font-weight: 380;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: calc(25 * var(--u));
+      color: var(--nav-grey);
+      font-weight: 400;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: calc(48 * var(--u));
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Right Artwork & Slabs */
+    .artwork-container {
+      position: absolute;
+      width: calc(940 * var(--u));
+      height: calc(940 * var(--u));
+      left: calc(1530 * var(--u) - (940 * var(--u) / 2));
+      top: calc(680 * var(--u) - (940 * var(--u) / 2));
+      z-index: 5;
+      mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 74%);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 74%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .artwork-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .glass-card {
+      position: absolute;
+      width: calc(451 * var(--u));
+      height: calc(201 * var(--u));
+      border-radius: calc(18 * var(--u));
+      padding: calc(26 * var(--u)) calc(28 * var(--u));
+      display: flex;
+      align-items: flex-start;
+      gap: calc(20 * var(--u));
+      z-index: 20;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.32);
+      transform: translateY(calc(-3 * var(--u)));
+    }
+
+    .card-benchmarking {
+      left: calc(1100 * var(--u));
+      top: calc(240 * var(--u));
+    }
+
+    .card-redteam {
+      left: calc(1440 * var(--u));
+      top: calc(910 * var(--u));
+    }
+
+    .card-icon-tile {
+      width: calc(63 * var(--u));
+      height: calc(63 * var(--u));
+      border-radius: calc(14 * var(--u));
+      background: rgba(189, 247, 238, 0.08);
+      border: 1px solid rgba(189, 247, 238, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--kicker-teal);
+    }
+
+    .card-kicker {
+      font-size: calc(15.5 * var(--u));
+      font-weight: 600;
+      color: var(--kicker-teal);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-title {
+      font-size: calc(22 * var(--u));
+      line-height: calc(28 * var(--u));
+      font-weight: 450;
+      color: #ffffff;
+    }
+
+    .logo-row {
+      position: absolute;
+      bottom: calc(44 * var(--u));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(56 * var(--u));
+      color: #cbd5e1;
+      z-index: 25;
+      white-space: nowrap;
+      padding: calc(10 * var(--u)) calc(28 * var(--u));
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .logo-item {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(10 * var(--u));
+      opacity: 0.85;
+      transition: all 0.25s ease;
+      cursor: default;
+      user-select: none;
+    }
+
+    .logo-item:hover {
+      opacity: 1;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .logo-item svg {
+      width: calc(22 * var(--u));
+      height: calc(22 * var(--u));
+      flex-shrink: 0;
+    }
+
+    .logo-ethereum {
+      font-family: var(--font-display);
+      font-size: calc(28 * var(--u));
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: -0.01em;
+    }
+
+    .logo-solidity {
+      font-family: var(--font-tech);
+      font-size: calc(26 * var(--u));
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-sepolia {
+      font-family: var(--font-display);
+      font-size: calc(24 * var(--u));
+      font-weight: 600;
+      letter-spacing: calc(6 * var(--u));
+      text-transform: lowercase;
+    }
+
+    .logo-metamask {
+      font-family: var(--font-tech);
+      font-size: calc(24 * var(--u));
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* Home Features Grid Below Hero */
+    .home-features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      padding: 32px 28px;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(111, 90, 220, 0.15);
+      border: 1px solid rgba(111, 90, 220, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ai-teal);
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 14.5px;
+      color: var(--muted-text);
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       VIEW 2: STUDENT FEE PAYMENT PORTAL (CLEAN & INTUITIVE SINGLE CHECKOUT)
+       ========================================================================== */
+    .card-panel {
+      padding: 34px;
+      border-radius: 24px;
+      position: relative;
+    }
+
+    .pay-container-clean {
+      max-width: 740px;
+      margin: 0 auto;
+    }
+
+    .pay-header-clean {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .pay-kicker-clean {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ai-teal);
+      background: rgba(159, 240, 236, 0.08);
+      border: 1px solid rgba(159, 240, 236, 0.25);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .pay-title-clean {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .pay-subtitle-clean {
+      font-size: 15px;
+      color: var(--muted-text);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .pay-card-clean {
+      background: linear-gradient(180deg, rgba(20, 18, 30, 0.75) 0%, rgba(13, 12, 19, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 34px 38px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(111, 90, 220, 0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .pay-step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .pay-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(159, 240, 236, 0.15);
+      border: 1px solid rgba(159, 240, 236, 0.4);
+      color: var(--ai-teal);
+      font-size: 11.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pay-step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+
+    .pay-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--nav-grey);
+      margin-bottom: 6px;
+    }
+
+    .form-label .req {
+      color: var(--ai-teal);
+    }
+
+    .input-field, .select-field {
+      width: 100%;
+      background: rgba(11, 13, 21, 0.9);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #ffffff;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .select-field {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ff0ec' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .select-field option {
+      background: #0f111a;
+      color: #ffffff;
+    }
+
+    .input-field:focus, .select-field:focus {
+      border-color: var(--violet-2);
+      box-shadow: 0 0 0 3px rgba(111, 90, 220, 0.25);
+      background: rgba(14, 16, 26, 0.98);
+    }
+
+    .pay-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 26px 0;
+    }
+
+    /* Fee Option Rows */
+    .fee-options-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fee-option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .fee-option-row:hover {
+      background: rgba(255, 255, 255, 0.045);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .fee-option-row.selected {
+      background: rgba(111, 90, 220, 0.12);
+      border-color: rgba(111, 90, 220, 0.5);
+      box-shadow: 0 4px 18px rgba(111, 90, 220, 0.18);
+    }
+
+    .fee-option-row.locked {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.25);
+      cursor: default;
+    }
+
+    .fee-row-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .fee-check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .fee-option-row.selected .fee-check-box {
+      background: var(--violet-gradient);
+      border-color: var(--violet-2);
+      box-shadow: 0 0 10px rgba(111, 90, 220, 0.5);
+    }
+
+    .fee-option-row.locked .fee-check-box {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #10b981;
+      color: #34d399;
+    }
+
+    .fee-check-svg {
+      display: none;
+    }
+
+    .fee-option-row.selected .fee-check-svg,
+    .fee-option-row.locked .fee-check-svg {
+      display: block;
+    }
+
+    .fee-row-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fee-row-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .fee-row-subtext {
+      font-size: 12px;
+      color: var(--muted-text);
+      margin-top: 1px;
+    }
+
+    .fee-pill-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--nav-grey);
+    }
+
+    .fee-pill-tag.mandatory {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .fee-row-right {
+      text-align: right;
+    }
+
+    .fee-row-eth {
+      font-family: var(--font-mono);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--ai-teal);
+    }
+
+    .fee-row-fiat {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--nav-grey);
+      margin-top: 2px;
+    }
+
+    /* Checkout Summary Strip */
+    .pay-summary-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pay-summary-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .pay-summary-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .pay-summary-meta {
+      font-size: 12px;
+      color: var(--nav-grey);
+    }
+
+    .pay-summary-meta span {
+      color: var(--muted-text);
+    }
+
+    .pay-total-group {
+      text-align: right;
+    }
+
+    .pay-total-eth {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ai-teal);
+      letter-spacing: -0.01em;
+    }
+
+    .pay-total-fiat {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--nav-grey);
+      margin-top: 2px;
+    }
+
+    /* High-Impact Payment Button */
+    .btn-pay-now, .btn-submit-main {
+      width: 100%;
+      height: 54px;
+      border-radius: 14px;
+      background: var(--violet-gradient);
+      color: #ffffff;
+      font-size: 15.5px;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 28px rgba(111, 90, 220, 0.45);
+      transition: all 0.25s ease;
+      margin-top: 18px;
+    }
+
+    .btn-pay-now:hover, .btn-submit-main:hover {
+      box-shadow: 0 12px 38px rgba(111, 90, 220, 0.65);
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    .btn-pay-now:disabled, .btn-submit-main:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Trust & Security Footnote */
+    .pay-security-footnote {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11.5px;
+      color: var(--nav-grey);
+    }
+
+    .treasury-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .treasury-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+    }
+
+    .treasury-addr-code {
+      font-family: var(--font-mono);
+      color: var(--muted-text);
+      font-size: 11px;
+    }
+
+    .btn-copy-clean {
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      color: var(--ai-teal);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-copy-clean:hover {
+      background: rgba(159, 240, 236, 0.15);
+      border-color: rgba(159, 240, 236, 0.4);
+      color: #ffffff;
+    }
+
+    .pay-trust-chips {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .pay-form-grid {
+        grid-template-columns: 1fr;
+      }
+      .pay-card-clean {
+        padding: 22px 18px;
+      }
+      .pay-summary-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .pay-total-group {
+        text-align: left;
+      }
+      .pay-security-footnote {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+      }
+    }
+
+    /* Specialized Utility Buttons */
+    .btn-export-csv {
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .btn-export-csv:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.32);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-table-action {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(111, 90, 220, 0.16);
+      border: 1px solid rgba(111, 90, 220, 0.4);
+      color: #c4b5fd;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-table-action:hover {
+      background: rgba(111, 90, 220, 0.35);
+      border-color: rgba(159, 240, 236, 0.5);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(111, 90, 220, 0.35);
+    }
+
+    .btn-modal-close {
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 14px;
+      font-size: 14.5px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .btn-modal-close:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       VIEW 3: VERIFY FEE STATUS
+       ========================================================================== */
+    .verify-box {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 40px;
+      border-radius: 24px;
+    }
+
+    .search-input-wrap {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .quick-tags-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--nav-grey);
+    }
+
+    .quick-tag-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      color: var(--ai-teal);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-tag-btn:hover {
+      background: rgba(159, 240, 236, 0.1);
+      border-color: var(--ai-teal);
+    }
+
+    .result-card-verified {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 20px;
+      padding: 28px;
+      animation: pageFadeIn 0.3s ease;
+    }
+
+    /* ==========================================================================
+       VIEW 4: COLLEGE ADMINISTRATION DASHBOARD
+       ========================================================================== */
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+
+    .admin-stat-card {
+      padding: 24px;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .admin-stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--violet-gradient);
+    }
+
+    .admin-stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--nav-grey);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .admin-stat-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .admin-stat-sub {
+      font-size: 13px;
+      color: var(--muted-text);
+    }
+
+    .admin-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .custom-table th {
+      padding: 16px 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--nav-grey);
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .custom-table td {
+      padding: 16px 20px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--glass-border);
+      color: #ffffff;
+      vertical-align: middle;
+    }
+
+    .custom-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .dept-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    /* ==========================================================================
+       VIEW 5: SMART CONTRACT & ARCHITECTURE HUB
+       ========================================================================== */
+    .code-panel {
+      background: #07080f;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #cbd5e1;
+      max-height: 480px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .viva-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+      border-left: 3px solid var(--violet-2);
+    }
+
+    .viva-q {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ai-teal);
+      margin-bottom: 8px;
+    }
+
+    .viva-a {
+      font-size: 14.5px;
+      color: var(--muted-text);
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       VIEW 6: FAQ
+       ========================================================================== */
+    .faq-accordion {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .faq-question {
+      padding: 20px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .faq-chevron {
+      transition: transform 0.25s ease;
+      color: var(--ai-teal);
+    }
+
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 24px 22px;
+      font-size: 14.5px;
+      color: var(--muted-text);
+      line-height: 1.6;
+      display: none;
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    /* ==========================================================================
+       Official Cryptographic Receipt Modal
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 6, 12, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .receipt-modal-box {
+      width: 100%;
+      max-width: 660px;
+      border-radius: 24px;
+      padding: 32px;
+      position: relative;
+    }
+
+    /* Dark Screen Certificate */
+    .certificate-card {
+      background: linear-gradient(145deg, #121422 0%, #0d0f1b 100%);
+      color: #ffffff;
+      border: 1px solid rgba(111, 90, 220, 0.35);
+      border-radius: 20px;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .certificate-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: var(--violet-gradient);
+    }
+
+    .cert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+    }
+
+    .cert-seal {
+      width: 54px;
+      height: 54px;
+      border: 2px dashed var(--ai-teal);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 8.5px;
+      font-weight: 800;
+      color: var(--ai-teal);
+      text-align: center;
+      line-height: 1.1;
+      letter-spacing: 0.05em;
+      background: rgba(159, 240, 236, 0.06);
+    }
+
+    .cert-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .cert-item-label {
+      font-size: 11px;
+      color: var(--nav-grey);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .cert-item-val {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .cert-hash-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 12px;
+      margin-bottom: 18px;
+    }
+
+    .cert-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      font-size: 12.5px;
+      color: var(--nav-grey);
+    }
+
+    .cert-badge-cleared {
+      background: rgba(16, 185, 129, 0.16);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Print styles: Pristine black & white on physical paper */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printableCertificate, #printableCertificate * {
+        visibility: visible !important;
+      }
+      #printableCertificate {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 2px solid #0f172a !important;
+        box-shadow: none !important;
+        padding: 40px !important;
+      }
+      #printableCertificate .cert-header {
+        border-bottom: 2px solid #0f172a !important;
+      }
+      #printableCertificate h3 {
+        color: #0f172a !important;
+      }
+      #printableCertificate .cert-item-label {
+        color: #64748b !important;
+      }
+      #printableCertificate .cert-item-val {
+        color: #0f172a !important;
+      }
+      #printableCertificate #rcptId {
+        color: #4338ca !important;
+      }
+      #printableCertificate #rcptAmount {
+        color: #059669 !important;
+      }
+      #printableCertificate .cert-hash-box {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      #printableCertificate code {
+        color: #4338ca !important;
+      }
+      #printableCertificate .cert-seal {
+        border-color: #4338ca !important;
+        color: #4338ca !important;
+        background: transparent !important;
+      }
+      #printableCertificate .cert-footer {
+        border-top: 1px solid #cbd5e1 !important;
+        color: #64748b !important;
+      }
+      #printableCertificate .cert-badge-cleared {
+        background: #dcfce7 !important;
+        color: #15803d !important;
+        border: 1px solid #86efac !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .master-nav {
+        display: none;
+      }
+      .portal-layout {
+        grid-template-columns: 1fr;
+      }
+      .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .home-features-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-canvas {
+        width: 100%;
+        height: auto;
+        padding: 40px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Grid -->
+  <div class="bg-grid"></div>
+
+  <!-- Master Sticky Header with Navigation across all pages -->
+  <header class="master-header">
+    <div class="brand-logo" onclick="switchPage('home')">
+      <div class="brand-tile">Ξ</div>
+      <div class="brand-text">
+        Strata
+        <sup>WEB3 PAY</sup>
+      </div>
+    </div>
+
+    <!-- Multi-Page Navigation Links -->
+    <nav>
+      <ul class="master-nav">
+        <li><a class="nav-tab-link active" onclick="switchPage('home')" id="nav-home">Home</a></li>
+        <li><a class="nav-tab-link" onclick="switchPage('pay')" id="nav-pay">Pay Tuition</a></li>
+        <li><a class="nav-tab-link" onclick="switchPage('verify')" id="nav-verify">Verify Clearance</a></li>
+        <li><a class="nav-tab-link" onclick="switchPage('admin')" id="nav-admin">College Admin</a></li>
+        <li><a class="nav-tab-link" onclick="switchPage('contract')" id="nav-contract">Smart Contract</a></li>
+        <li><a class="nav-tab-link" onclick="switchPage('faq')" id="nav-faq">FAQ & Docs</a></li>
+      </ul>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <div class="mode-pill" onclick="toggleWeb3Mode()" title="Toggle between Live MetaMask and Demo Sandbox">
+        <span class="pulse-dot" id="networkDot"></span>
+        <span id="networkText">Sepolia / Sandbox</span>
+      </div>
+
+      <button class="btn-wallet glass-surface" id="btnConnectWallet" onclick="connectMetaMask()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="4" width="20" height="16" rx="4"></rect>
+          <circle cx="16" cy="12" r="2"></circle>
+        </svg>
+        <span id="walletBtnText">Connect Wallet</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN APP CONTAINER (MULTI-PAGE VIEWS)
+       ========================================================================== -->
+  <main class="app-main">
+
+    <!-- ========================================================================
+         PAGE 1: HOME (THE HERO + ARCHITECTURE SUMMARY)
+         ======================================================================== -->
+    <section class="page-view active-page" id="view-home">
+      <!-- 2048x1455 Hero Canvas -->
+      <div class="hero-canvas-wrap">
+        <div class="hero-canvas">
+          <!-- Left Column -->
+          <div class="hero-left">
+            <h1 class="headline">
+              <span class="headline-line">Immutable fees</span><br>
+              <span class="headline-line">cleared on-chain</span><br>
+              <span class="headline-line">you trust.</span>
+            </h1>
+
+            <p class="subline">
+              Strata Pay layers verified student records, CEI smart contracts, and direct EVM settlements for universities, students, and academic departments.
+            </p>
+
+            <div class="hero-buttons">
+              <button class="btn-hero btn-hero-primary" onclick="switchPage('pay')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Launch Payment Portal</span>
+              </button>
+              <button class="btn-hero btn-hero-secondary glass-surface" onclick="switchPage('verify')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span>Verify Roll Clearance</span>
+              </button>
+            </div>
+
+            <div class="stats-row">
+              <div class="stat-item">
+                <span class="stat-number">0.05 ETH</span>
+                <span class="stat-label">per term</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">on-chain</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-number">0%</span>
+                <span class="stat-label">gateway fees</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Half Artwork -->
+          <div class="artwork-container">
+            <video class="artwork-media" autoplay loop muted playsinline poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/782a4a52-4c1e-4471-bb0c-aa232927f4a6.webp">
+              <source src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/435a4fe7-e43b-4e7c-af78-0be083e73569.mp4" type="video/mp4">
+            </video>
+          </div>
+
+          <!-- Slabs Overlapping Cards -->
+          <aside class="glass-card glass-surface card-benchmarking" onclick="switchPage('contract')">
+            <div class="card-icon-tile">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <polyline points="9 12 11 14 15 10"></polyline>
+              </svg>
+            </div>
+            <div>
+              <span class="card-kicker">CEI Protocol</span>
+              <h3 class="card-title">CollegeFeePayment.sol:<br>Reentrancy-Safe Contract.</h3>
+            </div>
+          </aside>
+
+          <aside class="glass-card glass-surface card-redteam" onclick="switchPage('verify')">
+            <div class="card-icon-tile">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 10V4h3v2h2V4h3v2h2V4h3v2h2V4h3v6c0 6-8 10-10 10S4 16 4 10z"></path>
+                <rect x="9" y="11" width="6" height="5" rx="1.5"></rect>
+              </svg>
+            </div>
+            <div>
+              <span class="card-kicker">On-Chain Ledger</span>
+              <h3 class="card-title">BASTION: Tamper-Proof<br>Proof of Tuition Clearance.</h3>
+            </div>
+          </aside>
+
+          <!-- Bottom Logos -->
+          <footer class="logo-row">
+            <span class="logo-item logo-ethereum">
+              <!-- Ethereum Diamond Icon -->
+              <svg viewBox="0 0 784.37 1277.39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon fill="#818cf8" points="392.07,0 383.5,29.11 383.5,873.74 392.07,882.29 784.13,650.54" />
+                <polygon fill="#6366f1" points="392.07,0 0,650.54 392.07,882.29 392.07,472.33" />
+                <polygon fill="#a5b4fc" points="392.07,956.52 387.24,962.41 387.24,1263.28 392.07,1277.38 784.37,724.89" />
+                <polygon fill="#818cf8" points="392.07,1277.38 392.07,956.52 0,724.89" />
+              </svg>
+              <span>Ethereum</span>
+            </span>
+
+            <span class="logo-item logo-solidity">
+              <!-- Solidity Logo Icon -->
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.55 0L12 11.23l6.55 11.23h5.45L17.45 11.23 24 0h-5.45zM5.45 0L0 9.35l5.45 9.35h5.45L5.45 9.35 10.9 0H5.45z" fill="#06b6d4"/>
+              </svg>
+              <span>Solidity</span>
+            </span>
+
+            <span class="logo-item logo-sepolia">
+              <!-- Sepolia Testnet Beacon Icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="#9ff0ec" stroke-width="2">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="3" fill="#9ff0ec"></circle>
+                <line x1="12" y1="1" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+              </svg>
+              <span>sepolia</span>
+            </span>
+
+            <span class="logo-item logo-metamask">
+              <!-- MetaMask Fox Polygon Icon -->
+              <svg viewBox="0 0 24 24" fill="#f59e0b">
+                <path d="M21.7 8.2l-3.2-6.5c-.2-.4-.7-.6-1.1-.4L12 4.1 6.6 1.3c-.4-.2-.9 0-1.1.4L2.3 8.2c-.3.6-.2 1.4.3 1.8l9 7.6c.2.2.6.2.8 0l9-7.6c.5-.4.6-1.2.3-1.8z"/>
+              </svg>
+              <span>METAMASK</span>
+            </span>
+          </footer>
+        </div>
+      </div>
+
+      <!-- Feature Grid below Hero -->
+      <div class="content-container">
+        <div class="home-features-grid">
+          <div class="glass-surface feature-card">
+            <div class="feature-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3>Immediate Settlement</h3>
+            <p>Tuition fees flow directly from student wallets to the college treasury with zero gateway delays or 2% credit card merchant charges.</p>
+          </div>
+
+          <div class="glass-surface feature-card">
+            <div class="feature-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <h3>CEI Reentrancy Defense</h3>
+            <p>Smart contract strictly updates internal state before performing any low-level transfer calls, preventing recursive attack vectors.</p>
+          </div>
+
+          <div class="glass-surface feature-card">
+            <div class="feature-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h3>Permanent Verification</h3>
+            <p>Each transaction produces a block confirmation hash and event log that serves as an immutable receipt for semesters to come.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         PAGE 2: STUDENT FEE PAYMENT PORTAL (CLEAN & INTUITIVE)
+         ======================================================================== -->
+    <section class="page-view" id="view-pay">
+      <div class="content-container">
+        <div class="pay-container-clean">
+          <div class="pay-header-clean">
+            <div class="pay-kicker-clean">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Decentralized Fee Clearance</span>
+            </div>
+            <h2 class="pay-title-clean">Pay Tuition & Fees</h2>
+            <p class="pay-subtitle-clean">Fast, direct fee settlement on Ethereum. Instant cryptographic receipt generated upon confirmation.</p>
+          </div>
+
+          <div class="pay-card-clean">
+            <form id="portalPayForm" onsubmit="handlePortalPayment(event)">
+              <!-- Section 1: Student Information -->
+              <div class="pay-step-header">
+                <div class="pay-step-num">1</div>
+                <div class="pay-step-title">Student Academic Information</div>
+              </div>
+
+              <div class="pay-form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="pStudentId">Roll Number / Student ID <span class="req">*</span></label>
+                  <input type="text" class="input-field mono" id="pStudentId" placeholder="Enter Student Roll ID (e.g. 2024-BCT-045)" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pStudentName">Student Full Name <span class="req">*</span></label>
+                  <input type="text" class="input-field" id="pStudentName" placeholder="Enter Full Legal Name" required />
+                </div>
+              </div>
+
+              <div class="pay-form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="pDepartment">Department / Branch</label>
+                  <select class="select-field" id="pDepartment">
+                    <option value="Computer Engineering">Computer Engineering</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Blockchain Technology" selected>Blockchain Technology</option>
+                    <option value="AI & Data Science">AI & Data Science</option>
+                    <option value="Electronics & Telecomm">Electronics & Telecomm</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pSemester">Academic Semester</label>
+                  <select class="select-field" id="pSemester">
+                    <option value="Semester 5" selected>Semester 5 (Current)</option>
+                    <option value="Semester 6">Semester 6</option>
+                    <option value="Semester 7">Semester 7</option>
+                    <option value="Semester 8">Semester 8</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pay-divider"></div>
+
+              <!-- Section 2: Fee Structure Selection -->
+              <div class="pay-step-header">
+                <div class="pay-step-num">2</div>
+                <div class="pay-step-title">Tuition & Fee Structure</div>
+              </div>
+
+              <div class="fee-options-stack">
+                <!-- Mandatory Base Fee Row -->
+                <div class="fee-option-row locked">
+                  <div class="fee-row-left">
+                    <div class="fee-check-box">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div>
+                      <div class="fee-row-title-wrap">
+                        <span class="fee-row-name">Base Semester Tuition</span>
+                        <span class="fee-pill-tag mandatory">Required</span>
+                      </div>
+                      <div class="fee-row-subtext">Core syllabus, lecture credits & academic term enrollment</div>
+                    </div>
+                  </div>
+                  <div class="fee-row-right">
+                    <div class="fee-row-eth">0.050 ETH</div>
+                    <div class="fee-row-fiat">≈ $175.00 USD</div>
+                  </div>
+                </div>
+
+                <!-- Optional Exam Fee Row -->
+                <div class="fee-option-row" id="cardExam" onclick="toggleFeeOption('cardExam', 'chkExam')">
+                  <input type="checkbox" id="chkExam" style="display:none;" />
+                  <div class="fee-row-left">
+                    <div class="fee-check-box">
+                      <svg class="fee-check-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div>
+                      <div class="fee-row-title-wrap">
+                        <span class="fee-row-name">Examination & Evaluation Fee</span>
+                        <span class="fee-pill-tag">Optional</span>
+                      </div>
+                      <div class="fee-row-subtext">Midterm test series, end-sem evaluation & grade issuance</div>
+                    </div>
+                  </div>
+                  <div class="fee-row-right">
+                    <div class="fee-row-eth">+0.008 ETH</div>
+                    <div class="fee-row-fiat">≈ $28.00 USD</div>
+                  </div>
+                </div>
+
+                <!-- Optional Computing Lab Fee Row -->
+                <div class="fee-option-row" id="cardLab" onclick="toggleFeeOption('cardLab', 'chkLab')">
+                  <input type="checkbox" id="chkLab" style="display:none;" />
+                  <div class="fee-row-left">
+                    <div class="fee-check-box">
+                      <svg class="fee-check-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div>
+                      <div class="fee-row-title-wrap">
+                        <span class="fee-row-name">Computing Lab & Research Sandbox</span>
+                        <span class="fee-pill-tag">Optional</span>
+                      </div>
+                      <div class="fee-row-subtext">GPU cluster access, Ethereum testbed & digital library</div>
+                    </div>
+                  </div>
+                  <div class="fee-row-right">
+                    <div class="fee-row-eth">+0.005 ETH</div>
+                    <div class="fee-row-fiat">≈ $17.50 USD</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary Box -->
+              <div class="pay-summary-box">
+                <div class="pay-summary-info">
+                  <div class="pay-summary-title">Total Due for Settlement</div>
+                  <div class="pay-summary-meta">
+                    Add-ons: <span id="summaryAddons">0.000 ETH ($0.00)</span> &bull; Est. Gas ~0.0004 ETH
+                  </div>
+                </div>
+                <div class="pay-total-group">
+                  <div class="pay-total-eth" id="portalGrandTotal">0.050 ETH</div>
+                  <div class="pay-total-fiat" id="portalGrandTotalUsd">≈ $175.00 USD</div>
+                </div>
+              </div>
+
+              <!-- High-Impact Pay Button -->
+              <button type="submit" class="btn-pay-now" id="btnPortalSubmit">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span id="portalSubmitText">Authorize & Pay via MetaMask</span>
+              </button>
+
+              <!-- Clean Trust & Security Footnote -->
+              <div class="pay-security-footnote">
+                <div class="treasury-badge">
+                  <span class="treasury-dot"></span>
+                  <span>Treasury Vault:</span>
+                  <span class="treasury-addr-code">0x742d...4438f44e</span>
+                  <button type="button" class="btn-copy-clean" onclick="copyAddress('0x742d35Cc6634C0532925a3b844Bc454e4438f44e')" title="Copy College Treasury Address">
+                    Copy
+                  </button>
+                </div>
+                <div class="pay-trust-chips">
+                  <span>✓ Instant On-Chain Receipt</span>
+                  <span>✓ Non-Custodial</span>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         PAGE 3: VERIFY FEE STATUS & CERTIFICATE
+         ======================================================================== -->
+    <section class="page-view" id="view-verify">
+      <div class="content-container">
+        <div class="page-header">
+          <div class="page-kicker">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>BASTION Verification</span>
+          </div>
+          <h2 class="page-title">Verify Tuition Clearance</h2>
+          <p class="page-subtitle">Instant on-chain verification for students, examination boards, and employers.</p>
+        </div>
+
+        <div class="glass-surface verify-box">
+          <form onsubmit="handleVerifyQuery(event)">
+            <div class="search-input-wrap">
+              <input type="text" class="input-field mono" id="vSearchInput" placeholder="Enter Student Roll ID (e.g. 2024-BCT-101) or 0x Wallet Address" required />
+              <button type="submit" class="btn-hero btn-hero-primary" style="height: 52px; padding: 0 28px; font-size: 15px; border-radius: 14px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Verify Record
+              </button>
+            </div>
+          </form>
+
+          <div class="quick-tags-wrap" id="vRecentTagsWrap" style="display: none;">
+            <span>Recent Paid Roll IDs:</span>
+            <div id="vRecentTagsList" style="display: inline-flex; gap: 8px; flex-wrap: wrap;"></div>
+          </div>
+
+          <div id="vResultBox"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         PAGE 4: COLLEGE ADMINISTRATION DASHBOARD
+         ======================================================================== -->
+    <section class="page-view" id="view-admin">
+      <div class="content-container">
+        <div class="page-header">
+          <div class="page-kicker">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            <span>College Treasury Authority</span>
+          </div>
+          <h2 class="page-title">Master Tuition Fee Ledger</h2>
+          <p class="page-subtitle">Real-time accounting of on-chain college fee deposits settled on the Ethereum blockchain.</p>
+        </div>
+
+        <!-- Admin Stats Grid -->
+        <div class="admin-stats-grid">
+          <div class="glass-surface admin-stat-card">
+            <div class="admin-stat-label">Total Treasury Revenue</div>
+            <div class="admin-stat-val" style="color: var(--success-teal);" id="adRevenueTotal">0.00 ETH</div>
+            <div class="admin-stat-sub">Direct on-chain balance</div>
+          </div>
+          <div class="glass-surface admin-stat-card">
+            <div class="admin-stat-label">Verified Students</div>
+            <div class="admin-stat-val" style="color: var(--ai-teal);" id="adPaidCount">0 Students</div>
+            <div class="admin-stat-sub">Zero payment disputes</div>
+          </div>
+          <div class="glass-surface admin-stat-card">
+            <div class="admin-stat-label">Current Term Fee</div>
+            <div class="admin-stat-val">0.05 ETH</div>
+            <div class="admin-stat-sub">Governed by contract</div>
+          </div>
+          <div class="glass-surface admin-stat-card">
+            <div class="admin-stat-label">Consensus Finality</div>
+            <div class="admin-stat-val" style="color: #a78bfa;">PoS 100%</div>
+            <div class="admin-stat-sub">Ethereum Sepolia / EVM</div>
+          </div>
+        </div>
+
+        <!-- Admin Ledger Table -->
+        <div class="glass-surface card-panel">
+          <div class="admin-header-row">
+            <div>
+              <h3 style="font-size: 20px; font-weight: 600; color: #fff;">Confirmed Tuition Deposits</h3>
+              <p style="font-size: 13px; color: var(--muted-text); margin-top: 2px;">Immutable transaction ledger verified across Ethereum consensus nodes</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <input type="text" id="adminSearchInput" oninput="filterAdminTable()" class="input-field" placeholder="Search student ID, name..." style="width: 190px; height: 38px; padding: 0 14px; font-size: 13px; border-radius: 10px;" />
+              <button class="btn-export-csv" id="btnSyncChain" onclick="syncLedgerFromBlockchain()" title="Query Ethereum blockchain for real FeePaid events">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span id="btnSyncText">Sync On-Chain</span>
+              </button>
+              <button class="btn-export-csv" onclick="openModal('modalContractSettings')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Contract Config</span>
+              </button>
+              <button class="btn-export-csv" onclick="exportLedgerCSV()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV Ledger</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Full Name</th>
+                  <th>Department</th>
+                  <th>Fee Paid</th>
+                  <th>Transaction Hash</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         PAGE 5: SMART CONTRACT & ARCHITECTURE HUB
+         ======================================================================== -->
+    <section class="page-view" id="view-contract">
+      <div class="content-container">
+        <div class="page-header">
+          <div class="page-kicker">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            <span>Sem 5 BCT Mini Project Specifications</span>
+          </div>
+          <h2 class="page-title">Smart Contract & Architecture</h2>
+          <p class="page-subtitle">Inspect the underlying Solidity smart contract code, gas metrics, and consensus architecture.</p>
+        </div>
+
+        <!-- Code Viewer -->
+        <div class="glass-surface card-panel" style="margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 15px; font-weight: 600; color: #fff;">CollegeFeePayment.sol</span>
+              <span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(16,185,129,0.15); color: #34d399; font-family: var(--font-mono);">Solidity ^0.8.20</span>
+            </div>
+            <button class="btn-export-csv" style="height: 36px; padding: 0 14px; font-size: 12.5px;" onclick="copyContractCode()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Copy Source Code</span>
+            </button>
+          </div>
+          <pre class="code-panel"><code>// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/**
+ * @title CollegeFeePayment
+ * @dev Academic fee payment contract utilizing Checks-Effects-Interactions (CEI) pattern.
+ */
+contract CollegeFeePayment {
+    address public owner;
+    address payable public collegeAccount;
+    uint256 public feeAmount = 0.05 ether;
+
+    struct PaymentRecord {
+        bool hasPaid;
+        uint256 amountPaid;
+        uint256 timestamp;
+        string studentId;
+        string studentName;
+        string department;
+        string semester;
+    }
+
+    mapping(address => PaymentRecord) public records;
+    address[] public studentList;
+
+    event FeePaid(
+        address indexed studentAddress,
+        string studentId,
+        string studentName,
+        uint256 amount,
+        uint256 timestamp
+    );
+
+    constructor(address payable _collegeAccount) {
+        owner = msg.sender;
+        collegeAccount = _collegeAccount;
+    }
+
+    function payFee(
+        string memory _id,
+        string memory _name,
+        string memory _dept,
+        string memory _sem
+    ) public payable {
+        // 1. CHECKS
+        require(msg.value == feeAmount, "Incorrect fee amount");
+        require(!records[msg.sender].hasPaid, "Fee already paid for this wallet");
+
+        // 2. EFFECTS
+        records[msg.sender] = PaymentRecord(true, msg.value, block.timestamp, _id, _name, _dept, _sem);
+        studentList.push(msg.sender);
+
+        // 3. INTERACTIONS (Low-level call prevents 2300 gas stipend crash)
+        (bool success, ) = collegeAccount.call{value: msg.value}("");
+        require(success, "Transfer to college failed");
+
+        emit FeePaid(msg.sender, _id, _name, msg.value, block.timestamp);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Viva Guide -->
+        <div class="glass-surface card-panel">
+          <h3 style="font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 20px;">Examiner Viva Defense Guide</h3>
+          
+          <div class="viva-box">
+            <div class="viva-q">Q1: Why is the Checks-Effects-Interactions (CEI) pattern enforced?</div>
+            <div class="viva-a">The CEI pattern checks preconditions, modifies the internal state storage (<code>records[msg.sender].hasPaid = true</code>), and only then sends Ether. This eliminates Reentrancy attacks where a malicious contract could recursively drain funds.</div>
+          </div>
+
+          <div class="viva-box">
+            <div class="viva-q">Q2: Why use <code>.call</code> over <code>.transfer()</code>?</div>
+            <div class="viva-a">The <code>.transfer()</code> method forwards a hardcoded 2300 gas stipend, which fails if the college account is a multi-signature wallet or smart contract. Modern Solidity best practice mandates using <code>.call</code> with a boolean success check.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         PAGE 6: FAQ & KNOWLEDGE BASE
+         ======================================================================== -->
+    <section class="page-view" id="view-faq">
+      <div class="content-container">
+        <div class="page-header">
+          <div class="page-kicker">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Support & Documentation</span>
+          </div>
+          <h2 class="page-title">Frequently Asked Questions</h2>
+          <p class="page-subtitle">Common questions regarding blockchain tuition payments, wallet setups, and clearance proofs.</p>
+        </div>
+
+        <div class="faq-accordion">
+          <div class="faq-item open">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>How do I pay fees using the Sepolia Testnet?</span>
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              Install the MetaMask extension in your browser, switch your network to "Sepolia", get free testnet ETH from a Sepolia faucet (e.g. Google Cloud Web3 Faucet), and click "Pay with MetaMask" on our portal!
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>What if I don't have MetaMask installed?</span>
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              Our dApp includes an interactive <strong>Demo Sandbox Mode</strong>. You can test and demonstrate the complete fee payment, mining, and certificate generation flow seamlessly during your presentation without needing an active wallet extension.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>Can a student pay twice from the same wallet?</span>
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              No. The smart contract validates <code>require(!records[msg.sender].hasPaid, "Fee already paid")</code>, preventing duplicate charges and double payments.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>How is my official fee receipt verified?</span>
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              Every payment generates an Ethereum transaction hash stored permanently in the blockchain's receipt trie. Anyone can verify clearance instantly on our "Verify Clearance" page using just your Roll ID.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       OFFICIAL PRINTABLE CERTIFICATE MODAL
+       ========================================================================== -->
+  <div class="modal-backdrop" id="modalReceipt">
+    <div class="glass-surface receipt-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span style="font-size: 13px; font-weight: 700; color: var(--ai-teal); text-transform: uppercase; letter-spacing: 0.08em;">BASTION Cryptographic Receipt</span>
+        <button onclick="closeModal('modalReceipt')" style="background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+
+      <div class="certificate-card" id="printableCertificate">
+        <div class="cert-header">
+          <div>
+            <h3 style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.01em;">STRATA ACADEMIC REGISTRY</h3>
+            <p style="font-size: 12px; color: var(--nav-grey); margin-top: 2px;">Blockchain Verified Tuition Clearance Certificate</p>
+          </div>
+          <div class="cert-seal">
+            CHAIN<br/>SEAL
+          </div>
+        </div>
+
+        <div class="cert-grid">
+          <div>
+            <div class="cert-item-label">Student Name</div>
+            <div class="cert-item-val" id="rcptName">Aarav Mehta</div>
+          </div>
+          <div>
+            <div class="cert-item-label">Student Roll ID</div>
+            <div class="cert-item-val mono" style="color: var(--ai-teal);" id="rcptId">2024-BCT-110</div>
+          </div>
+          <div>
+            <div class="cert-item-label">Department</div>
+            <div class="cert-item-val" id="rcptDept">Blockchain Technology</div>
+          </div>
+          <div>
+            <div class="cert-item-label">Amount Cleared</div>
+            <div class="cert-item-val mono" style="color: var(--success-teal); font-size: 17px; font-weight: 700;" id="rcptAmount">0.050 ETH</div>
+          </div>
+        </div>
+
+        <div class="cert-hash-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="cert-item-label">Ethereum Transaction Hash</span>
+            <a id="rcptEtherscanLink" href="https://sepolia.etherscan.io" target="_blank" rel="noopener noreferrer" style="color: var(--ai-teal); font-size: 11.5px; text-decoration: none;">
+              View on Etherscan ↗
+            </a>
+          </div>
+          <code class="mono" style="color: #c4b5fd; word-break: break-all; font-size: 12px; display: block; margin: 4px 0 8px;" id="rcptHash">0x4e29f3d91b8a5367b1897c8d76e33f381014a51ebbb59b24479e0a02cfc08129</code>
+          <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: var(--nav-grey);">
+            <span>Block #5220492 &bull; Consensus Finalized</span>
+            <span id="rcptDate">Oct 25, 2026</span>
+          </div>
+        </div>
+
+        <div class="cert-footer">
+          <span>Validated by <code>CollegeFeePayment.sol</code></span>
+          <span class="cert-badge-cleared">
+            <span class="pulse-dot" style="width: 6px; height: 6px; background: #34d399;"></span>
+            ON-CHAIN CLEARED
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; margin-top: 22px;">
+        <button onclick="window.print()" class="btn-submit-main" style="height: 48px; font-size: 14.5px; flex: 1; margin: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Print Official Certificate
+        </button>
+        <button onclick="closeModal('modalReceipt')" class="btn-modal-close">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       REAL WEB3 CONTRACT SETTINGS & 1-CLICK DEPLOYER MODAL
+       ========================================================================== -->
+  <div class="modal-backdrop" id="modalContractSettings">
+    <div class="glass-surface" style="max-width: 620px; width: 100%; border-radius: 24px; padding: 32px; border: 1px solid rgba(159, 240, 236, 0.3); background: #0f111a; box-shadow: 0 20px 60px rgba(0,0,0,0.6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(111, 90, 220, 0.2); display: flex; align-items: center; justify-content: center; color: var(--ai-teal); font-size: 18px;">
+            ⚙️
+          </div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; color: #ffffff;">Web3 Contract Infrastructure</h3>
+            <p style="font-size: 12px; color: var(--nav-grey);">Connected to Ethereum Sepolia / EVM Smart Contract</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modalContractSettings')" style="background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
+      </div>
+
+      <!-- Live Contract Status Pill -->
+      <div style="background: rgba(159, 240, 236, 0.05); border: 1px solid rgba(159, 240, 236, 0.2); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--ai-teal); text-transform: uppercase;">Active Smart Contract</span>
+          <span id="cfgContractStatusBadge" style="font-size: 10.5px; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 600;">ACTIVE</span>
+        </div>
+        <div class="mono" style="font-size: 12.5px; color: #ffffff; word-break: break-all;" id="cfgCurrentContractDisplay">
+          0x8B32e185eFa84d720bF7d7100D582bFFD1B5c269
+        </div>
+        <div style="margin-top: 8px; display: flex; gap: 12px;">
+          <a id="cfgEtherscanContractLink" href="https://sepolia.etherscan.io/address/0x8B32e185eFa84d720bF7d7100D582bFFD1B5c269" target="_blank" rel="noopener noreferrer" style="font-size: 11.5px; color: var(--ai-teal); text-decoration: none;">
+            View on Sepolia Etherscan ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Update Contract Address Form -->
+      <div style="margin-bottom: 22px;">
+        <label class="form-label">Custom Deployed Contract Address (Sepolia / Localhost)</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="cfgInputContractAddr" class="input-field mono" placeholder="0x..." style="font-size: 13px;" />
+          <button type="button" class="btn-hero btn-hero-primary" style="height: 46px; padding: 0 18px; font-size: 13px; border-radius: 12px; white-space: nowrap;" onclick="saveCustomContractAddress()">
+            Save Address
+          </button>
+        </div>
+      </div>
+
+      <!-- 1-Click Deployer -->
+      <div style="background: rgba(111, 90, 220, 0.1); border: 1px dashed rgba(111, 90, 220, 0.4); border-radius: 16px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 14px; font-weight: 600; color: #ffffff;">🚀 1-Click Contract Deployer</div>
+            <div style="font-size: 12px; color: var(--muted-text); margin-top: 2px;">Deploy fresh CollegeFeePayment.sol directly to your connected network via MetaMask.</div>
+          </div>
+        </div>
+        <button type="button" class="btn-submit-main" id="btnDeployContract" onclick="deployContractLive()" style="height: 46px; font-size: 14px; margin-top: 8px;">
+          Deploy to Connected Network (Sepolia / Local)
+        </button>
+        <div id="cfgDeployProgress" style="font-size: 12px; color: var(--ai-teal); margin-top: 10px; display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Global JavaScript Multi-Page Router & Production Web3 Engine
+       ========================================================================== -->
+  <script>
+    // Real Production Web3 Constants
+    const DEFAULT_CONTRACT_ADDRESS = "0x8B32E185EfA84d720bf7D7100d582bffD1b5C269";
+    const DEFAULT_COLLEGE_ACCOUNT = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
+    const SEPOLIA_CHAIN_ID = 11155111;
+    const SEPOLIA_HEX_CHAIN_ID = "0xaa36a7";
+    const SEPOLIA_RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
+    const SEPOLIA_EXPLORER = "https://sepolia.etherscan.io";
+    const ETH_PRICE_USD = 3500;
+
+    // Compiled Smart Contract ABI & Bytecode
+    const CONTRACT_ABI = [{"inputs":[{"internalType":"address payable","name":"_collegeAccount","type":"address"},{"internalType":"uint256","name":"_initialFeeAmount","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"oldAccount","type":"address"},{"indexed":false,"internalType":"address","name":"newAccount","type":"address"}],"name":"CollegeAccountUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"oldFee","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"FeeAmountUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"studentAddress","type":"address"},{"indexed":false,"internalType":"string","name":"studentId","type":"string"},{"indexed":false,"internalType":"string","name":"studentName","type":"string"},{"indexed":false,"internalType":"string","name":"department","type":"string"},{"indexed":false,"internalType":"string","name":"semester","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"FeePaid","type":"event"},{"inputs":[{"internalType":"address","name":"_student","type":"address"}],"name":"checkPaymentStatus","outputs":[{"internalType":"bool","name":"hasPaid","type":"bool"},{"internalType":"uint256","name":"amountPaid","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"string","name":"studentId","type":"string"},{"internalType":"string","name":"studentName","type":"string"},{"internalType":"string","name":"department","type":"string"},{"internalType":"string","name":"semester","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"_studentId","type":"string"}],"name":"checkPaymentStatusByRollId","outputs":[{"internalType":"bool","name":"hasPaid","type":"bool"},{"internalType":"address","name":"studentAddress","type":"address"},{"internalType":"uint256","name":"amountPaid","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"string","name":"studentName","type":"string"},{"internalType":"string","name":"department","type":"string"},{"internalType":"string","name":"semester","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"collegeAccount","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAllStudents","outputs":[{"internalType":"address[]","name":"","type":"address[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTotalStudentsPaid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"_studentId","type":"string"},{"internalType":"string","name":"_studentName","type":"string"},{"internalType":"string","name":"_department","type":"string"},{"internalType":"string","name":"_semester","type":"string"}],"name":"payFee","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"records","outputs":[{"internalType":"bool","name":"hasPaid","type":"bool"},{"internalType":"uint256","name":"amountPaid","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"string","name":"studentId","type":"string"},{"internalType":"string","name":"studentName","type":"string"},{"internalType":"string","name":"department","type":"string"},{"internalType":"string","name":"semester","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"","type":"string"}],"name":"rollToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"studentList","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable","name":"_newCollegeAccount","type":"address"}],"name":"updateCollegeAccount","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_newFeeAmount","type":"uint256"}],"name":"updateFeeAmount","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+    const CONTRACT_BYTECODE = "0x608060405234801561000f575f80fd5b5060405161170e38038061170e83398101604081905261002e916100be565b6001600160a01b0382166100885760405162461bcd60e51b815260206004820152601f60248201527f496e76616c696420636f6c6c656765206163636f756e74206164647265737300604482015260640160405180910390fd5b5f8054336001600160a01b031991821617909155600180549091166001600160a01b0393909316929092179091556002556100f5565b5f80604083850312156100cf575f80fd5b82516001600160a01b03811681146100e5575f80fd5b6020939093015192949293505050565b61160c806101025f395ff3fe6080604052600436106100bf575f3560e01c80639ea55bb01161007c578063e9e3092711610057578063e9e3092714610207578063f50d4f4714610228578063f520fb7d14610268578063f80de5631461029a575f80fd5b80639ea55bb0146101b6578063a4b38aa8146101d5578063bee42c4e146101e8575f80fd5b8063469e9067146100c357806369e15404146100fe5780637df221e9146101215780638da5cb5b1461015857806394317c011461017657806396f5da6614610195575b5f80fd5b3480156100ce575f80fd5b506100e26100dd3660046110ca565b6102ae565b6040516100f59796959493929190611139565b60405180910390f35b348015610109575f80fd5b5061011360025481565b6040519081526020016100f5565b34801561012c575f80fd5b5061014061013b3660046111a7565b610507565b6040516001600160a01b0390911681526020016100f5565b348015610163575f80fd5b505f54610140906001600160a01b031681565b348015610181575f80fd5b50600154610140906001600160a01b031681565b3480156101a0575f80fd5b506101b46101af3660046110ca565b61052f565b005b3480156101c1575f80fd5b506101b46101d03660046111a7565b610612565b6101b46101e336600461125b565b61067c565b3480156101f3575f80fd5b506100e26102023660046110ca565b610a83565b348015610212575f80fd5b5061021b610d66565b6040516100f59190611301565b348015610233575f80fd5b5061014061024236600461134d565b80516020818301810180516004825292820191909301209152546001600160a01b031681565b348015610273575f80fd5b5061028761028236600461134d565b610dc6565b6040516100f59796959493929190611387565b3480156102a5575f80fd5b50600554610113565b600360208190525f9182526040909120805460018201546002830154938301805460ff90931694919391926102e2906113cd565b80601f016020809104026020016040519081016040528092919081815260200182805461030e906113cd565b80156103595780601f1061033057610100808354040283529160200191610359565b820191905f5260205f20905b81548152906001019060200180831161033c57829003601f168201915b50505050509080600401805461036e906113cd565b80601f016020809104026020016040519081016040528092919081815260200182805461039a906113cd565b80156103e55780601f106103bc576101008083540402835291602001916103e5565b820191905f5260205f20905b8154815290600101906020018083116103c857829003601f168201915b5050505050908060050180546103fa906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610426906113cd565b80156104715780601f1061044857610100808354040283529160200191610471565b820191905f5260205f20905b81548152906001019060200180831161045457829003601f168201915b505050505090806006018054610486906113cd565b80601f01602080910402602001604051908101604052809291908181526020018280546104b2906113cd565b80156104fd5780601f106104d4576101008083540402835291602001916104fd565b820191905f5260205f20905b8154815290600101906020018083116104e057829003601f168201915b5050505050905087565b60058181548110610516575f80fd5b5f918252602090912001546001600160a01b0316905081565b5f546001600160a01b031633146105615760405162461bcd60e51b815260040161055890611405565b60405180910390fd5b6001600160a01b0381166105a95760405162461bcd60e51b815260206004820152600f60248201526e496e76616c6964206164647265737360881b6044820152606401610558565b600154604080516001600160a01b03928316815291831660208301527fe69408bed62815dfd99c1b9eada0d4f094a04aa3a01c3392a8b3ea1fb2a7977c910160405180910390a1600180546001600160a01b0319166001600160a01b0392909216919091179055565b5f546001600160a01b0316331461063b5760405162461bcd60e51b815260040161055890611405565b60025460408051918252602082018390527fb6600428041f36ab218d984115a85adc1ffb17cb85a81801032cb590a8a8bc99910160405180910390a1600255565b5f8451116106cc5760405162461bcd60e51b815260206004820152601a60248201527f53747564656e742049442063616e6e6f7420626520656d7074790000000000006044820152606401610558565b5f83511161071c5760405162461bcd60e51b815260206004820152601c60248201527f53747564656e74206e616d652063616e6e6f7420626520656d707479000000006044820152606401610558565b600254341461076d5760405162461bcd60e51b815260206004820152601960248201527f496e636f72726563742066656520616d6f756e742073656e74000000000000006044820152606401610558565b335f9081526003602052604090205460ff16156107cc5760405162461bcd60e51b815260206004820181905260248201527f46656520616c7265616479207061696420666f7220746869732077616c6c65746044820152606401610558565b5f6001600160a01b03166004856040516107e6919061144f565b908152604051908190036020019020546001600160a01b0316146108565760405162461bcd60e51b815260206004820152602160248201527f46656520616c7265616479207061696420666f72207468697320526f6c6c20496044820152601160fa1b6064820152608401610558565b6040805160e081018252600180825234602080840191825242848601908152606085018a8152608086018a905260a0860189905260c08601889052335f908152600393849052969096208551815460ff1916901515178155925193830193909355915160028201559251919291908201906108d190826114b8565b50608082015160048201906108e690826114b8565b5060a082015160058201906108fb90826114b8565b5060c0820151600682019061091090826114b8565b5090505033600485604051610925919061144f565b90815260405190819003602001812080546001600160a01b039384166001600160a01b03199182161790915560058054600181810183555f9283527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db09091018054909316331790925590549092169034905f6040518083038185875af1925050503d805f81146109d0576040519150601f19603f3d011682016040523d82523d5f602084013e6109d5565b606091505b5050905080610a315760405162461bcd60e51b815260206004820152602260248201527f5472616e7366657220746f20636f6c6c656765206163636f756e74206661696c604482015261195960f21b6064820152608401610558565b336001600160a01b03167faf274a8c232ee2f2549232e51e7bcb5e0dd2bf2eab75393fe9d3c1956be268f6868686863442604051610a7496959493929190611574565b60405180910390a25050505050565b5f805f6060806060805f60035f8a6001600160a01b03166001600160a01b031681526020019081526020015f206040518060e00160405290815f82015f9054906101000a900460ff161515151581526020016001820154815260200160028201548152602001600382018054610af8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610b24906113cd565b8015610b6f5780601f10610b4657610100808354040283529160200191610b6f565b820191905f5260205f20905b815481529060010190602001808311610b5257829003601f168201915b50505050508152602001600482018054610b88906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610bb4906113cd565b8015610bff5780601f10610bd657610100808354040283529160200191610bff565b820191905f5260205f20905b815481529060010190602001808311610be257829003601f168201915b50505050508152602001600582018054610c18906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610c44906113cd565b8015610c8f5780601f10610c6657610100808354040283529160200191610c8f565b820191905f5260205f20905b815481529060010190602001808311610c7257829003601f168201915b50505050508152602001600682018054610ca8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610cd4906113cd565b8015610d1f5780601f10610cf657610100808354040283529160200191610d1f565b820191905f5260205f20905b815481529060010190602001808311610d0257829003601f168201915b5050505050815250509050805f015181602001518260400151836060015184608001518560a001518660c00151975097509750975097509750975050919395979092949650565b60606005805480602002602001604051908101604052809291908181526020018280548015610dbc57602002820191905f5260205f20905b81546001600160a01b03168152600190910190602001808311610d9e575b5050505050905090565b5f805f8060608060605f600489604051610de0919061144f565b908152604080519182900360209081018320546001600160a01b03165f818152600380845284822060e087018652805460ff161515875260018101549487019490945260028401549486019490945292820180549195509293926060840191610e48906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610e74906113cd565b8015610ebf5780601f10610e9657610100808354040283529160200191610ebf565b820191905f5260205f20905b815481529060010190602001808311610ea257829003601f168201915b50505050508152602001600482018054610ed8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610f04906113cd565b8015610f4f5780601f10610f2657610100808354040283529160200191610f4f565b820191905f5260205f20905b815481529060010190602001808311610f3257829003601f168201915b50505050508152602001600582018054610f68906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054610f94906113cd565b8015610fdf5780601f10610fb657610100808354040283529160200191610fdf565b820191905f5260205f20905b815481529060010190602001808311610fc257829003601f168201915b50505050508152602001600682018054610ff8906113cd565b80601f0160208091040260200160405190810160405280929190818152602001828054611024906113cd565b801561106f5780601f106110465761010080835404028352916020019161106f565b820191905f5260205f20905b81548152906001019060200180831161105257829003601f168201915b5050505050815250509050805f0151828260200151836040015184608001518560a001518660c0015198509850985098509850985098505050919395979092949650565b6001600160a01b03811681146110c7575f80fd5b50565b5f602082840312156110da575f80fd5b81356110e5816110b3565b9392505050565b5f5b838110156111065781810151838201526020016110ee565b50505f910152565b5f81518084526111258160208601602086016110ec565b601f01601f19169290920160200192915050565b871515815286602082015285604082015260e060608201525f61115f60e083018761110e565b8281036080840152611171818761110e565b905082810360a0840152611185818661110e565b905082810360c0840152611199818561110e565b9a9950505050505050505050565b5f602082840312156111b7575f80fd5b5035919050565b634e487b7160e01b5f52604160045260245ffd5b5f82601f8301126111e1575f80fd5b813567ffffffffffffffff808211156111fc576111fc6111be565b604051601f8301601f19908116603f01168101908282118183101715611224576112246111be565b8160405283815286602085880101111561123c575f80fd5b836020870160208301375f602085830101528094505050505092915050565b5f805f806080858703121561126e575f80fd5b843567ffffffffffffffff80821115611285575f80fd5b611291888389016111d2565b955060208701359150808211156112a6575f80fd5b6112b2888389016111d2565b945060408701359150808211156112c7575f80fd5b6112d3888389016111d2565b935060608701359150808211156112e8575f80fd5b506112f5878288016111d2565b91505092959194509250565b602080825282518282018190525f9190848201906040850190845b818110156113415783516001600160a01b03168352928401929184019160010161131c565b50909695505050505050565b5f6020828403121561135d575f80fd5b813567ffffffffffffffff811115611373575f80fd5b61137f848285016111d2565b949350505050565b871515815260018060a01b038716602082015285604082015284606082015260e060808201525f6113bb60e083018661110e565b82810360a0840152611185818661110e565b600181811c908216806113e157607f821691505b6020821081036113ff57634e487b7160e01b5f52602260045260245ffd5b50919050565b6020808252602a908201527f4f6e6c7920636f6c6c6567652061646d696e2063616e20706572666f726d20746040820152693434b99030b1ba34b7b760b11b606082015260800190565b5f82516114608184602087016110ec565b9190910192915050565b601f8211156114b3575f81815260208120601f850160051c810160208610156114905750805b601f850160051c820191505b818110156114af5782815560010161149c565b5050505b505050565b815167ffffffffffffffff8111156114d2576114d26111be565b6114e6816114e084546113cd565b8461146a565b602080601f831160018114611519575f84156115025750858301515b5f19600386901b1c1916600185901b1785556114af565b5f85815260208120601f198616915b8281101561154757888601518255948401946001909101908401611528565b508582101561156457878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b60c081525f61158660c083018961110e565b8281036020840152611598818961110e565b905082810360408401526115ac818861110e565b905082810360608401526115c0818761110e565b6080840195909552505060a0015294935050505056fea2646970667358221220aa62399f66239e692fcfa8a7fd0d48abeb8edec49f807f66102a057c1d09508764736f6c63430008140033";
+
+    // State
+    let contractAddress = localStorage.getItem('STRATA_CONTRACT_ADDRESS') || DEFAULT_CONTRACT_ADDRESS;
+    let collegeAccount = localStorage.getItem('STRATA_COLLEGE_ACCOUNT') || DEFAULT_COLLEGE_ACCOUNT;
+    let userWallet = null;
+    let userBalance = "0.00";
+
+    // Real On-Chain Ledger Records (Synced from Ethereum smart contract events, filtered from any legacy dummy seeds)
+    let rawRecords = JSON.parse(localStorage.getItem('STRATA_RECORDS') || '[]');
+    let records = rawRecords.filter(r => 
+      r && 
+      r.studentId !== "2024-BCT-101" && 
+      r.studentId !== "2024-BCT-102" && 
+      r.studentId !== "2024-BCT-103" && 
+      r.studentId !== "2024-BCT-109" &&
+      !r.txHash?.includes("4e29f3d91b8a5367b1897c8d76e33f381014a51ebbb59b24479e0a02cfc08129")
+    );
+    localStorage.setItem('STRATA_RECORDS', JSON.stringify(records));
+
+    // Read Provider (MetaMask BrowserProvider or public Sepolia RPC fallback)
+    function getReadProvider() {
+      if (window.ethereum) {
+        return new ethers.BrowserProvider(window.ethereum);
+      }
+      return new ethers.JsonRpcProvider(SEPOLIA_RPC_URL);
+    }
+
+    // Ensure Network is Sepolia or local testnet
+    async function ensureSepoliaNetwork() {
+      if (!window.ethereum) return false;
+      try {
+        const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+        const currentChainId = parseInt(chainIdHex, 16);
+        if (currentChainId === SEPOLIA_CHAIN_ID || currentChainId === 31337 || currentChainId === 1337) {
+          return true;
+        }
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: SEPOLIA_HEX_CHAIN_ID }]
+        });
+        return true;
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: SEPOLIA_HEX_CHAIN_ID,
+                chainName: 'Ethereum Sepolia Testnet',
+                nativeCurrency: { name: 'Sepolia ETH', symbol: 'SEP', decimals: 18 },
+                rpcUrls: [SEPOLIA_RPC_URL],
+                blockExplorerUrls: [SEPOLIA_EXPLORER]
+              }]
+            });
+            return true;
+          } catch (addError) {
+            console.error(addError);
+            return false;
+          }
+        }
+        return false;
+      }
+    }
+
+    // Multi-Page Switcher with URL hash routing
+    function switchPage(pageId, pushHash = true) {
+      document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-page'));
+      document.querySelectorAll('.nav-tab-link').forEach(n => n.classList.remove('active'));
+
+      const target = document.getElementById('view-' + pageId);
+      const navTarget = document.getElementById('nav-' + pageId);
+
+      if (target) {
+        target.classList.add('active-page');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (navTarget) {
+        navTarget.classList.add('active');
+      }
+
+      if (pushHash && window.location.hash !== '#' + pageId) {
+        history.pushState(null, '', '#' + pageId);
+      }
+
+      if (pageId === 'admin') {
+        renderAdminTable();
+        syncLedgerFromBlockchain();
+      }
+    }
+
+    // Hash routing listeners
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '') || 'home';
+      switchPage(hash, false);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const initial = window.location.hash.replace('#', '') || 'home';
+      switchPage(initial, false);
+      updateContractConfigUI();
+      checkAutoConnect();
+    });
+
+    // Check if wallet is already connected
+    async function checkAutoConnect() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts && accounts.length > 0) {
+            userWallet = accounts[0];
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const bal = await provider.getBalance(userWallet);
+            userBalance = parseFloat(ethers.formatEther(bal)).toFixed(4);
+
+            const short = userWallet.substring(0, 6) + '...' + userWallet.substring(userWallet.length - 4);
+            const wText = document.getElementById('walletBtnText');
+            if (wText) wText.innerText = short;
+            const wBtn = document.getElementById('btnConnectWallet');
+            if (wBtn) wBtn.style.borderColor = '#10b981';
+            const netText = document.getElementById('networkText');
+            if (netText) netText.innerText = "Sepolia Live";
+            const netDot = document.getElementById('networkDot');
+            if (netDot) netDot.style.background = "#10b981";
+          }
+        } catch (e) {
+          console.warn("Auto-connect check note:", e);
+        }
+
+        window.ethereum.on('accountsChanged', (accs) => {
+          if (accs.length === 0) {
+            userWallet = null;
+            document.getElementById('walletBtnText').innerText = "Connect Wallet";
+            document.getElementById('btnConnectWallet').style.borderColor = 'var(--glass-border)';
+          } else {
+            userWallet = accs[0];
+            connectMetaMask();
+          }
+        });
+
+        window.ethereum.on('chainChanged', () => {
+          window.location.reload();
+        });
+      }
+    }
+
+    // Connect MetaMask
+    async function connectMetaMask() {
+      if (!window.ethereum) {
+        alert("MetaMask not detected! Please install MetaMask extension from https://metamask.io to interact with Ethereum smart contracts.");
+        return;
+      }
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (!accounts || accounts.length === 0) return;
+        userWallet = accounts[0];
+        await ensureSepoliaNetwork();
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const bal = await provider.getBalance(userWallet);
+        userBalance = parseFloat(ethers.formatEther(bal)).toFixed(4);
+
+        const short = userWallet.substring(0, 6) + '...' + userWallet.substring(userWallet.length - 4);
+        document.getElementById('walletBtnText').innerText = short;
+        document.getElementById('btnConnectWallet').style.borderColor = '#10b981';
+        document.getElementById('networkText').innerText = "Sepolia Live";
+        document.getElementById('networkDot').style.background = "#10b981";
+
+        syncLedgerFromBlockchain();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Modal helpers
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.add('active');
+    }
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.remove('active');
+    }
+
+    // Update UI elements displaying Contract Address
+    function updateContractConfigUI() {
+      const curDisplay = document.getElementById('cfgCurrentContractDisplay');
+      if (curDisplay) curDisplay.innerText = contractAddress;
+
+      const link = document.getElementById('cfgEtherscanContractLink');
+      if (link) link.href = `${SEPOLIA_EXPLORER}/address/${contractAddress}`;
+
+      const input = document.getElementById('cfgInputContractAddr');
+      if (input && !input.value) input.value = contractAddress;
+    }
+
+    // Save custom contract address
+    function saveCustomContractAddress() {
+      const input = document.getElementById('cfgInputContractAddr');
+      const val = input ? input.value.trim() : '';
+      if (!ethers.isAddress(val)) {
+        alert("Invalid Ethereum address! Please enter a valid 0x hexadecimal address.");
+        return;
+      }
+      contractAddress = val;
+      localStorage.setItem('STRATA_CONTRACT_ADDRESS', val);
+      updateContractConfigUI();
+      alert("Active contract address updated to:\n" + val);
+      closeModal('modalContractSettings');
+      syncLedgerFromBlockchain();
+    }
+
+    // 1-Click Contract Deployer via MetaMask
+    async function deployContractLive() {
+      if (!window.ethereum) {
+        alert("MetaMask required to deploy smart contract.");
+        return;
+      }
+      const btn = document.getElementById('btnDeployContract');
+      const progress = document.getElementById('cfgDeployProgress');
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "Connecting to MetaMask...";
+        progress.style.display = 'block';
+        progress.innerText = "Requesting account access...";
+
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (!accounts || accounts.length === 0) throw new Error("No MetaMask account selected");
+        await ensureSepoliaNetwork();
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const signerAddr = await signer.getAddress();
+
+        progress.innerText = "Creating contract factory & awaiting MetaMask signature...";
+        const factory = new ethers.ContractFactory(CONTRACT_ABI, CONTRACT_BYTECODE, signer);
+        
+        const treasury = (collegeAccount && ethers.isAddress(collegeAccount)) ? collegeAccount : signerAddr;
+        const initialFee = ethers.parseEther("0.05");
+
+        const contractInstance = await factory.deploy(treasury, initialFee);
+        const deployTx = contractInstance.deploymentTransaction();
+        progress.innerText = `Broadcasting to Ethereum! Mining block for tx ${deployTx.hash.slice(0, 10)}...\n(Please wait ~15s for consensus)...`;
+
+        await contractInstance.waitForDeployment();
+        const deployedAddr = await contractInstance.getAddress();
+
+        contractAddress = deployedAddr;
+        localStorage.setItem('STRATA_CONTRACT_ADDRESS', deployedAddr);
+        updateContractConfigUI();
+
+        progress.innerHTML = `<span style="color: #34d399; font-weight: 700;">✓ Deployed Successfully!</span><br/>Address: <code class="mono" style="color: #fff;">${deployedAddr}</code>`;
+        btn.innerText = "Deploy Another Contract";
+        btn.disabled = false;
+        alert("CollegeFeePayment.sol successfully deployed on-chain at:\n" + deployedAddr);
+        syncLedgerFromBlockchain();
+      } catch (err) {
+        console.error(err);
+        progress.innerHTML = `<span style="color: #f87171;">Deployment failed: ${err.reason || err.message || err}</span>`;
+        btn.disabled = false;
+        btn.innerText = "Deploy to Connected Network (Sepolia / Local)";
+      }
+    }
+
+    // Toggle interactive fee category cards
+    function toggleFeeOption(cardId, chkId) {
+      const chk = document.getElementById(chkId);
+      const card = document.getElementById(cardId);
+      if (!chk || !card) return;
+      chk.checked = !chk.checked;
+      if (chk.checked) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+      calculateFeeTotal();
+    }
+
+    // Fee calculation in Portal with USD conversion
+    function calculateFeeTotal() {
+      let total = 0.050;
+      let addons = 0.000;
+      const chkExam = document.getElementById('chkExam');
+      const chkLab = document.getElementById('chkLab');
+
+      if (chkExam && chkExam.checked) { total += 0.008; addons += 0.008; }
+      if (chkLab && chkLab.checked) { total += 0.005; addons += 0.005; }
+      
+      const addonsUsd = (addons * ETH_PRICE_USD).toFixed(2);
+      const grandTotalUsd = (total * ETH_PRICE_USD).toFixed(2);
+
+      const sAddons = document.getElementById('summaryAddons');
+      const pGrandTotal = document.getElementById('portalGrandTotal');
+      const pGrandTotalUsd = document.getElementById('portalGrandTotalUsd');
+
+      if (sAddons) sAddons.innerHTML = addons.toFixed(3) + " ETH <span style='color: var(--nav-grey); font-size: 12px;'>($" + addonsUsd + ")</span>";
+      if (pGrandTotal) pGrandTotal.innerText = total.toFixed(3) + " ETH";
+      if (pGrandTotalUsd) pGrandTotalUsd.innerText = "≈ $" + grandTotalUsd + " USD";
+    }
+
+    // Copy Address Helper
+    function copyAddress(addr) {
+      navigator.clipboard.writeText(addr);
+      alert("College Treasury Address copied to clipboard:\n" + addr);
+    }
+
+    // Quick Verify Demo Helper
+    function quickVerify(id) {
+      const input = document.getElementById('vSearchInput');
+      if (input) {
+        input.value = id;
+        handleVerifyQuery({ preventDefault: () => {} });
+      }
+    }
+
+    // Real Web3 Payment Execution on CollegeFeePayment.sol
+    async function handlePortalPayment(e) {
+      e.preventDefault();
+      const id = document.getElementById('pStudentId').value.trim();
+      const name = document.getElementById('pStudentName').value.trim();
+      const dept = document.getElementById('pDepartment').value;
+      const sem = document.getElementById('pSemester').value;
+      const totalAmount = document.getElementById('portalGrandTotal').innerText.replace(' ETH', '').trim();
+      const btn = document.getElementById('btnPortalSubmit');
+      const btnText = document.getElementById('portalSubmitText');
+
+      if (!window.ethereum) {
+        alert("MetaMask is required to make live on-chain tuition payments on Ethereum.\n\nPlease install MetaMask from https://metamask.io and refresh.");
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btnText.innerText = "Connecting MetaMask...";
+
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (!accounts || accounts.length === 0) throw new Error("No MetaMask account selected");
+        userWallet = accounts[0];
+
+        await ensureSepoliaNetwork();
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const feeContract = new ethers.Contract(contractAddress, CONTRACT_ABI, signer);
+
+        // Verify contract is deployed
+        const code = await provider.getCode(contractAddress);
+        if (!code || code === '0x') {
+          throw new Error(`No smart contract found at address ${contractAddress} on this network.\n\nPlease deploy CollegeFeePayment.sol first using the 1-Click Deployer in 'Smart Contract' or 'College Admin', or enter your custom deployed contract address.`);
+        }
+
+        // Pre-check on-chain if roll or wallet already paid
+        try {
+          const checkWallet = await feeContract.checkPaymentStatus(userWallet);
+          if (checkWallet && checkWallet.hasPaid) {
+            throw new Error("This wallet address has already paid college tuition on-chain!");
+          }
+          const checkRoll = await feeContract.checkPaymentStatusByRollId(id);
+          if (checkRoll && checkRoll.hasPaid) {
+            throw new Error(`Roll ID ${id} is already cleared on the blockchain!`);
+          }
+        } catch (checkErr) {
+          if (checkErr.message && checkErr.message.includes("already")) {
+            throw checkErr;
+          }
+        }
+
+        btnText.innerText = "Confirm transaction in MetaMask...";
+        const feeWei = ethers.parseEther(totalAmount);
+
+        // Real smart contract call
+        const tx = await feeContract.payFee(id, name, dept, sem, { value: feeWei });
+        btnText.innerText = `Mining on Ethereum (${tx.hash.slice(0, 8)}...)...\n(Waiting for consensus confirmation)`;
+
+        const receipt = await tx.wait(1);
+        const realTxHash = receipt.hash;
+        const realBlockNumber = receipt.blockNumber;
+
+        const rec = {
+          studentId: id,
+          studentName: name,
+          department: dept,
+          amountEth: totalAmount,
+          txHash: realTxHash,
+          blockNumber: realBlockNumber,
+          timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          onChain: true,
+          explorerUrl: `${SEPOLIA_EXPLORER}/tx/${realTxHash}`
+        };
+
+        records.unshift(rec);
+        localStorage.setItem('STRATA_RECORDS', JSON.stringify(records));
+
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+        }
+
+        showCertificate(rec);
+        syncLedgerFromBlockchain();
+      } catch (err) {
+        console.error(err);
+        alert("Payment Transaction Error:\n" + (err.reason || err.message || err));
+      } finally {
+        btn.disabled = false;
+        btnText.innerText = "Authorize & Pay via MetaMask";
+      }
+    }
+
+    // Show Printable Certificate
+    function showCertificate(rec) {
+      document.getElementById('rcptName').innerText = rec.studentName;
+      document.getElementById('rcptId').innerText = rec.studentId;
+      document.getElementById('rcptDept').innerText = rec.department;
+      document.getElementById('rcptAmount').innerText = rec.amountEth + " ETH";
+      document.getElementById('rcptHash').innerText = rec.txHash;
+      document.getElementById('rcptDate').innerText = rec.timestamp;
+
+      const link = document.getElementById('rcptEtherscanLink');
+      if (link) {
+        if (rec.txHash && rec.txHash.startsWith('0x')) {
+          link.href = `${SEPOLIA_EXPLORER}/tx/${rec.txHash}`;
+          link.style.display = 'inline';
+        } else {
+          link.style.display = 'none';
+        }
+      }
+
+      openModal('modalReceipt');
+    }
+
+    // Real On-Chain Status Checker Query
+    async function handleVerifyQuery(e) {
+      e.preventDefault();
+      const q = document.getElementById('vSearchInput').value.trim();
+      const container = document.getElementById('vResultBox');
+      if (!q) return;
+
+      container.innerHTML = `
+        <div style="padding: 24px; text-align: center; color: var(--ai-teal); font-size: 14px;">
+          <span class="pulse-dot" style="display: inline-block; margin-right: 8px;"></span>
+          Querying Ethereum Smart Contract at ${contractAddress.slice(0, 8)}... for "${q}"...
+        </div>
+      `;
+
+      try {
+        const readProvider = getReadProvider();
+        const feeContract = new ethers.Contract(contractAddress, CONTRACT_ABI, readProvider);
+
+        let found = null;
+
+        // 1. Check directly on-chain if 42-char address
+        if (q.startsWith('0x') && q.length === 42) {
+          try {
+            const res = await feeContract.checkPaymentStatus(q);
+            if (res && res.hasPaid) {
+              found = {
+                studentId: res.studentId,
+                studentName: res.studentName,
+                department: res.department,
+                amountEth: ethers.formatEther(res.amountPaid),
+                timestamp: new Date(Number(res.timestamp) * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                txHash: "On-Chain Verified Record",
+                studentAddress: q,
+                onChain: true
+              };
+            }
+          } catch (e) {}
+        } else {
+          try {
+            const res = await feeContract.checkPaymentStatusByRollId(q);
+            if (res && res.hasPaid) {
+              found = {
+                studentId: q,
+                studentName: res.studentName,
+                department: res.department,
+                amountEth: ethers.formatEther(res.amountPaid),
+                timestamp: new Date(Number(res.timestamp) * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                txHash: "On-Chain Verified Record",
+                studentAddress: res.studentAddress,
+                onChain: true
+              };
+            }
+          } catch (e) {}
+        }
+
+        // 2. Cross-reference with persistent records
+        const localMatch = records.find(r => 
+          r.studentId.toLowerCase() === q.toLowerCase() ||
+          r.studentName.toLowerCase().includes(q.toLowerCase()) ||
+          (r.txHash && r.txHash.toLowerCase() === q.toLowerCase())
+        );
+
+        if (localMatch) {
+          if (!found) found = localMatch;
+          else if (localMatch.txHash && localMatch.txHash.startsWith('0x')) {
+            found.txHash = localMatch.txHash;
+            found.blockNumber = localMatch.blockNumber;
+          }
+        }
+
+        if (found) {
+          const txDisplay = (found.txHash && found.txHash.startsWith('0x'))
+            ? `<a href="${SEPOLIA_EXPLORER}/tx/${found.txHash}" target="_blank" rel="noopener noreferrer" style="color: var(--ai-teal); text-decoration: underline;">${found.txHash} ↗</a>`
+            : `<span>${found.txHash}</span>`;
+
+          container.innerHTML = `
+            <div class="result-card-verified" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 18px; padding: 24px; margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <span style="color: var(--success-teal); font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; gap: 8px;">
+                  <span class="pulse-dot" style="background: #34d399;"></span>
+                  On-Chain Tuition Clearance Verified on Ethereum
+                </span>
+                <button onclick='showCertificate(${JSON.stringify(found)})' class="btn-table-action" style="height: 34px; padding: 0 16px; font-size: 13px;">
+                  View Official Certificate
+                </button>
+              </div>
+              <div style="font-size: 16px; color: #fff; margin-bottom: 8px;">
+                <strong>${found.studentName}</strong> (<span class="mono" style="color: var(--ai-teal);">${found.studentId}</span>) &bull; ${found.department}
+              </div>
+              <div style="font-size: 13px; color: var(--muted-text); margin-bottom: 12px;">
+                Amount Paid: <strong class="mono" style="color: #34d399;">${found.amountEth} ETH</strong> &bull; Cleared on: ${found.timestamp}
+              </div>
+              <div class="mono" style="font-size: 12px; color: var(--nav-grey); word-break: break-all; background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                Block Tx Hash: ${txDisplay}
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 22px; color: #fca5a5; font-size: 14.5px; margin-top: 20px;">
+              <div style="font-weight: 600; margin-bottom: 4px;">✕ No On-Chain Record Found</div>
+              <div>No confirmed tuition payment found for "${q}" on the smart contract (<code>${contractAddress.slice(0, 10)}...</code>). Please ensure fee remittance is finalized.</div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `
+          <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 20px; color: #fca5a5; font-size: 14px; margin-top: 20px;">
+            Error querying blockchain: ${err.message || err}
+          </div>
+        `;
+      }
+    }
+
+    // Sync On-Chain Events & Ledger from Smart Contract
+    async function syncLedgerFromBlockchain() {
+      const syncBtn = document.getElementById('btnSyncText');
+      if (syncBtn) syncBtn.innerText = "Syncing...";
+
+      try {
+        const readProvider = getReadProvider();
+        const feeContract = new ethers.Contract(contractAddress, CONTRACT_ABI, readProvider);
+
+        // Update on-chain treasury metrics
+        try {
+          const colAcc = await feeContract.collegeAccount();
+          collegeAccount = colAcc;
+          localStorage.setItem('STRATA_COLLEGE_ACCOUNT', colAcc);
+
+          const bal = await readProvider.getBalance(colAcc);
+          const balEth = parseFloat(ethers.formatEther(bal)).toFixed(3);
+          const revEl = document.getElementById('adRevenueTotal');
+          if (revEl) revEl.innerText = `${balEth} ETH`;
+
+          const totalPaid = await feeContract.getTotalStudentsPaid();
+          const paidEl = document.getElementById('adPaidCount');
+          if (paidEl) paidEl.innerText = `${totalPaid} Students`;
+        } catch (mErr) {
+          console.warn("Metrics fetch note:", mErr);
+        }
+
+        // Query FeePaid events
+        try {
+          const filter = feeContract.filters.FeePaid();
+          const currentBlock = await readProvider.getBlockNumber();
+          const fromBlock = Math.max(0, currentBlock - 10000);
+          const events = await feeContract.queryFilter(filter, fromBlock, 'latest');
+
+          if (events && events.length > 0) {
+            const onChainRecords = events.map(ev => {
+              const args = ev.args;
+              return {
+                studentId: args.studentId,
+                studentName: args.studentName,
+                department: args.department,
+                amountEth: ethers.formatEther(args.amount),
+                txHash: ev.transactionHash,
+                blockNumber: ev.blockNumber,
+                timestamp: new Date(Number(args.timestamp) * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                onChain: true,
+                explorerUrl: `${SEPOLIA_EXPLORER}/tx/${ev.transactionHash}`
+              };
+            });
+
+            const map = new Map();
+            onChainRecords.forEach(r => map.set(r.txHash || r.studentId, r));
+            records.forEach(r => {
+              if (!map.has(r.txHash || r.studentId)) map.set(r.txHash || r.studentId, r);
+            });
+            records = Array.from(map.values());
+            localStorage.setItem('STRATA_RECORDS', JSON.stringify(records));
+          }
+        } catch (evErr) {
+          console.warn("Event query note:", evErr);
+        }
+
+        renderAdminTable();
+        updateContractConfigUI();
+      } catch (err) {
+        console.error("Blockchain sync failed:", err);
+      } finally {
+        if (syncBtn) syncBtn.innerText = "Sync On-Chain";
+      }
+    }
+
+    // Admin Table Filter & Render
+    function filterAdminTable() {
+      const term = (document.getElementById('adminSearchInput')?.value || '').trim().toLowerCase();
+      renderAdminTable(term);
+    }
+
+    function renderAdminTable(filterTerm = '') {
+      const tbody = document.getElementById('adminTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let rev = 0;
+      records.forEach(r => rev += parseFloat(r.amountEth || 0));
+
+      const revEl = document.getElementById('adRevenueTotal');
+      if (revEl) revEl.innerText = `${rev.toFixed(3)} ETH`;
+      const paidEl = document.getElementById('adPaidCount');
+      if (paidEl) paidEl.innerText = `${records.length} Students`;
+
+      // Update verify tags dynamically from real on-chain records
+      const tagsWrap = document.getElementById('vRecentTagsWrap');
+      const tagsList = document.getElementById('vRecentTagsList');
+      if (tagsWrap && tagsList) {
+        if (records.length > 0) {
+          tagsWrap.style.display = 'flex';
+          tagsList.innerHTML = records.slice(0, 5).map(r => 
+            `<button type="button" class="quick-tag-btn" onclick="quickVerify('${r.studentId}')">${r.studentId}</button>`
+          ).join('');
+        } else {
+          tagsWrap.style.display = 'none';
+        }
+      }
+
+      const filtered = records.filter(r => {
+        if (!filterTerm) return true;
+        return r.studentId.toLowerCase().includes(filterTerm) ||
+               r.studentName.toLowerCase().includes(filterTerm) ||
+               r.department.toLowerCase().includes(filterTerm) ||
+               (r.txHash && r.txHash.toLowerCase().includes(filterTerm));
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px 20px; color: var(--muted-text);">
+              <div style="font-size: 26px; margin-bottom: 8px;">⛓️</div>
+              <div style="font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 4px;">No On-Chain Payment Records Yet</div>
+              <div style="font-size: 13px; color: var(--nav-grey); max-width: 480px; margin: 0 auto; line-height: 1.5;">
+                All ledger records are synced live from the Ethereum smart contract. Connect your MetaMask wallet to submit a payment or click <strong>Sync On-Chain</strong> to fetch live blockchain events.
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(r => {
+        const txLink = (r.txHash && r.txHash.startsWith('0x'))
+          ? `<a href="${SEPOLIA_EXPLORER}/tx/${r.txHash}" target="_blank" rel="noopener noreferrer" style="color: var(--ai-teal); text-decoration: underline;" title="${r.txHash}">${r.txHash.substring(0, 10)}... ↗</a>`
+          : `<span title="${r.txHash}">${r.txHash ? r.txHash.substring(0, 10) + '...' : 'Verified'}</span>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="mono" style="color: var(--ai-teal); font-weight: 600;">${r.studentId}</td>
+          <td style="font-weight: 500;">${r.studentName}</td>
+          <td><span class="dept-badge">${r.department}</span></td>
+          <td class="mono" style="color: var(--success-teal); font-weight: 700;">${r.amountEth} ETH</td>
+          <td class="mono" style="font-size: 11.5px;">${txLink}</td>
+          <td style="font-size: 13px; color: var(--nav-grey);">${r.timestamp}</td>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: #34d399; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 999px;">
+              <span class="pulse-dot" style="width: 5px; height: 5px; background: #34d399;"></span> On-Chain
+            </span>
+          </td>
+          <td>
+            <button onclick='showCertificate(${JSON.stringify(r)})' class="btn-table-action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              Certificate
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Export CSV
+    function exportLedgerCSV() {
+      let csv = "Student ID,Student Name,Department,Amount ETH,Tx Hash,Date,Status\n";
+      records.forEach(r => {
+        csv += `"${r.studentId}","${r.studentName}","${r.department}","${r.amountEth}","${r.txHash}","${r.timestamp}","Confirmed"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'StrataPay_OnChain_Ledger.csv');
+      a.click();
+    }
+
+    // Copy contract code
+    function copyContractCode() {
+      const code = document.querySelector('.code-panel code')?.innerText || '';
+      navigator.clipboard.writeText(code);
+      alert('Solidity smart contract code copied to clipboard!');
+    }
+
+    // Toggle FAQ
+    function toggleFaq(el) {
+      el.parentElement.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
